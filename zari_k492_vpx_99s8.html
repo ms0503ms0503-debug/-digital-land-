@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>비밀 관리자 패널</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; background: #f0f0f0; max-width: 500px; margin: 0 auto; }
+        .card { background: white; padding: 20px; border-radius: 15px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        h1 { font-size: 1.2rem; text-align: center; color: #d4a373; }
+        input, button { width: 100%; padding: 12px; margin: 5px 0; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; }
+        button { background: #d4a373; color: white; font-weight: bold; border: none; cursor: pointer; }
+        .red-btn { background: #dc2743; }
+    </style>
+</head>
+<body>
+    <h1>🤫 비밀 관리 페이지</h1>
+    <div class="card">
+        <strong>1. 상단 멘트 수정</strong>
+        <input type="text" id="edit-badge" placeholder="배지 (예: OPEN EVENT 🎁)">
+        <input type="text" id="edit-title" placeholder="제목 (예: 돗자리 ⛺️)">
+        <input type="text" id="edit-sub" placeholder="설명 (예: 1+1 이벤트 중!)">
+        <button onclick="saveText()">상단 문구 저장</button>
+    </div>
+    <div class="card">
+        <strong>2. 광고 등록 (1~150번)</strong>
+        <input type="number" id="cell-num" placeholder="칸 번호">
+        <input type="text" id="img-url" placeholder="이미지 주소(URL)">
+        <input type="number" id="ad-hours" placeholder="노출 시간(시간 단위)">
+        <button onclick="addAd()" class="red-btn">광고 즉시 등록</button>
+    </div>
+
+    <script>
+        const STORAGE_KEY = 'dotzari_data_v1';
+        const TEXT_KEY = 'dotzari_text_v1';
+        const oldText = JSON.parse(localStorage.getItem(TEXT_KEY)) || {};
+        document.getElementById('edit-badge').value = oldText.badge || "";
+        document.getElementById('edit-title').value = oldText.title || "";
+        document.getElementById('edit-sub').value = oldText.sub || "";
+
+        function saveText() {
+            localStorage.setItem(TEXT_KEY, JSON.stringify({
+                badge: document.getElementById('edit-badge').value,
+                title: document.getElementById('edit-title').value,
+                sub: document.getElementById('edit-sub').value
+            }));
+            alert("메인 페이지 문구가 변경되었습니다!");
+        }
+        function addAd() {
+            let adData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+            const n = document.getElementById('cell-num').value;
+            const u = document.getElementById('img-url').value;
+            const h = document.getElementById('ad-hours').value;
+            if(!n || !u || !h) return alert("내용을 입력해주세요!");
+            adData[n] = { url: u, expiry: Date.now() + (h * 3600000) };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(adData));
+            alert(n + "번 자리에 광고 등록 완료!");
+        }
+    </script>
+</body>
+</html>
