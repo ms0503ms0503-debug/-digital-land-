@@ -68,7 +68,6 @@
             clearInterval(timerInterval);
         }
 
-        // 실시간 데이터 수신 (핵심!)
         db.ref('/').on('value', (snapshot) => {
             const data = snapshot.val() || {};
             const textData = data.text || { badge:"OPEN", title:"돗자리", sub:"환영합니다", p1:"5천", p2:"3만", p3:"10만" };
@@ -100,8 +99,15 @@
                         clearInterval(timerInterval);
                         timerInterval = setInterval(() => {
                             const rem = ad.expiry - Date.now();
-                            document.getElementById('timer').innerText = rem > 0 ? 
-                                `남은 분양 시간: ${Math.floor(rem/3600000)}시간 ${Math.floor((rem%3600000)/60000)}분 ${Math.floor((rem%60000)/1000)}초` : "종료됨";
+                            if (rem <= 0) {
+                                document.getElementById('timer').innerText = "분양 종료";
+                                return;
+                            }
+                            const days = Math.floor(rem / (1000 * 60 * 60 * 24));
+                            const hrs = Math.floor((rem % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                            const mins = Math.floor((rem % (1000 * 60 * 60)) / (1000 * 60));
+                            const secs = Math.floor((rem % (1000 * 60)) / 1000);
+                            document.getElementById('timer').innerText = `남은 시간: ${days}일 ${hrs}시간 ${mins}분 ${secs}초`;
                         }, 1000);
                     } else {
                         document.querySelectorAll('.cell').forEach(c => c.classList.remove('selected'));
