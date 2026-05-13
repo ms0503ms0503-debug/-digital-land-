@@ -9,34 +9,36 @@
         .header-box { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 20px; }
         h1 { font-size: 1.5rem; margin-bottom: 10px; color: #1d1d1f; }
         
-        /* [NEW] 숨겨진 가격표 스타일 */
-        #price-toggle-btn { background: #eee; border: none; padding: 10px 20px; border-radius: 50px; cursor: pointer; font-weight: bold; margin-bottom: 10px; transition: 0.3s; }
-        #price-toggle-btn:hover { background: #ddd; }
-        .price-container { 
-            display: none; /* 기본은 숨김 */
-            justify-content: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; 
-            animation: fadeIn 0.4s;
-        }
+        /* 가격표 토글 섹션 */
+        #price-toggle-btn { background: #eee; border: none; padding: 10px 20px; border-radius: 50px; cursor: pointer; font-weight: bold; margin-bottom: 10px; }
+        .price-container { display: none; justify-content: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; animation: fadeIn 0.4s; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
         .price-card { background: white; padding: 12px 15px; border-radius: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #eee; flex: 1; min-width: 100px; max-width: 120px; }
         .price-card .amount { font-size: 1rem; font-weight: 900; }
 
-        /* 격자판 */
+        /* 150칸 격자판 */
         #grid-container { display: grid; grid-template-columns: repeat(10, 1fr); gap: 2px; background-color: #ddd; border: 2px solid #1d1d1f; width: 95%; max-width: 500px; margin: 0 auto; }
         .cell { background-color: white; cursor: pointer; transition: 0.2s; position: relative; overflow: hidden; aspect-ratio: 1 / 1; }
+        
+        /* [핵심] 선택된 칸 색칠 스타일 */
+        .cell.selected { background-color: #ffeb3b !important; border: 2px solid #ff3b30; z-index: 5; transform: scale(1.05); }
+        
         .cell.occupied { background-size: cover; background-position: center; }
         .timer-label { position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(0,0,0,0.6); color: #fff; font-size: 0.5rem; padding: 1px 0; display: none; }
         .occupied .timer-label { display: block; }
 
-        /* [NEW] 이미지 확대 모달(팝업) 스타일 */
+        /* 이미지 확대 모달 */
         #modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); justify-content: center; align-items: center; }
         #modal img { max-width: 90%; max-height: 80%; border-radius: 10px; border: 3px solid white; }
-        #modal-close { position: absolute; top: 20px; right: 20px; color: white; font-size: 30px; cursor: pointer; font-weight: bold; }
+        #modal-close { position: absolute; top: 20px; right: 20px; color: white; font-size: 30px; cursor: pointer; }
 
+        /* 안내 패널 */
         .info-panel { margin-top: 25px; padding: 25px; background: white; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 90%; max-width: 400px; display: inline-block; }
         .dm-btn { display: block; width: 100%; padding: 18px; font-size: 1.1rem; font-weight: bold; background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); color: white; border: none; border-radius: 15px; text-decoration: none; box-sizing: border-box; }
 
+        /* 관리자 모드 */
         #admin-panel { display: none; margin-top: 20px; padding: 20px; background: white; border-radius: 20px; border: 2px dashed #ccc; }
+        #admin-panel input { width: 85%; padding: 10px; margin: 5px; border-radius: 10px; border: 1px solid #ddd; }
         #secret-trigger { width: 40px; height: 40px; position: fixed; bottom: 0; right: 0; z-index: 999; }
     </style>
 </head>
@@ -55,7 +57,7 @@
     <div id="grid-container"></div>
 
     <div class="info-panel">
-        <div id="selected-info" style="font-weight:bold; color:#ff3b30; margin-bottom:15px;">비어있는 칸을 선택하세요</div>
+        <div id="selected-info" style="font-weight:bold; color:#ff3b30; margin-bottom:15px;">원하는 칸을 터치해 보세요</div>
         <a href="https://www.instagram.com/사장님_아이디/" target="_blank" class="dm-btn">인스타 DM으로 신청하기</a>
     </div>
 
@@ -66,7 +68,6 @@
     </div>
 
     <div id="admin-panel">
-        <h3>ADMIN</h3>
         <input type="number" id="cell-num" placeholder="칸 번호">
         <input type="text" id="img-url" placeholder="이미지 URL">
         <input type="number" id="ad-hours" placeholder="시간(h)">
@@ -81,13 +82,9 @@
         function togglePrice() {
             const list = document.getElementById('price-list');
             const btn = document.getElementById('price-toggle-btn');
-            if(list.style.display === 'flex') {
-                list.style.display = 'none';
-                btn.innerText = '💰 분양 가격표 보기';
-            } else {
-                list.style.display = 'flex';
-                btn.innerText = '❌ 가격표 닫기';
-            }
+            const isOpen = list.style.display === 'flex';
+            list.style.display = isOpen ? 'none' : 'flex';
+            btn.innerText = isOpen ? '💰 분양 가격표 보기' : '❌ 가격표 닫기';
         }
 
         function initGrid() {
@@ -102,13 +99,15 @@
                 updateCell(i, cell);
                 
                 cell.addEventListener('click', () => {
+                    // [가시성 강화] 기존 선택 해제 후 새로운 칸 선택
+                    document.querySelectorAll('.cell').forEach(c => c.classList.remove('selected'));
+                    cell.classList.add('selected');
+
                     const data = adData[i];
                     if (data && data.expiry > Date.now()) {
-                        // [확대 기능] 이미 분양된 땅이면 사진 확대
                         openModal(data.url);
                     } else {
-                        // 분양 안 된 땅이면 메시지만 표시
-                        document.getElementById('selected-info').innerText = `${i}번 칸 선택됨 (입점 가능)`;
+                        document.getElementById('selected-info').innerText = `${i}번 칸 선택 완료!`;
                     }
                 });
                 gridContainer.appendChild(cell);
