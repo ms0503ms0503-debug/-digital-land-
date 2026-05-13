@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Digital Land - 인스타 DM 분양 중</title>
     <style>
-        /* 사장님이 보내주신 UI 스타일 그대로 적용 */
+        /* 사장님이 "젤 이쁘다"고 하신 그 UI 디자인 그대로 */
         body { font-family: 'Apple SD Gothic Neo', sans-serif; text-align: center; background-color: #f0f2f5; margin: 0; padding: 20px; color: #1c1e21; }
         .header-box { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 20px; }
         h1 { font-size: 1.5rem; margin-bottom: 10px; color: #1d1d1f; }
         .status-bar { background: #1d1d1f; color: #fff; padding: 12px 25px; border-radius: 50px; display: inline-block; font-weight: bold; font-size: 0.9rem; }
         
-        /* 100칸 격자판 (가로 10칸으로 가시성 수정) */
+        /* 100칸 격자판 (10x10) */
         #grid-container { 
             display: grid; 
             grid-template-columns: repeat(10, 1fr); 
@@ -23,11 +23,11 @@
             margin: 20px auto; 
             aspect-ratio: 1 / 1;
         }
-        .cell { background-color: white; cursor: pointer; transition: 0.2s; position: relative; }
+        .cell { background-color: white; border-radius: 1px; cursor: pointer; transition: 0.2s; position: relative; overflow: hidden; }
         .cell:hover { background-color: #ffeb3b; transform: scale(1.1); z-index: 10; }
         .cell.occupied { background-size: cover; background-position: center; border: none; }
         
-        /* 타이머 표시 (사장님 UI에 맞춰 심플하게 추가) */
+        /* 타이머 표시 */
         .timer-label { 
             position: absolute; bottom: 0; left: 0; width: 100%; 
             background: rgba(0,0,0,0.6); color: #fff; 
@@ -39,18 +39,20 @@
         .info-panel { margin-top: 20px; padding: 25px; background: white; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 90%; max-width: 400px; display: inline-block; }
         .price-info { color: #ff3b30; font-weight: bold; font-size: 1.2rem; margin-bottom: 15px; }
         
-        /* 인스타 연결 버튼 스타일 */
+        /* 사장님이 강조하신 인스타 그라데이션 버튼 */
         .dm-btn { 
             display: block; width: 100%; padding: 18px; font-size: 1.1rem; font-weight: bold; 
             background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); 
             color: white; border: none; border-radius: 15px; text-decoration: none; cursor: pointer;
             box-shadow: 0 4px 15px rgba(220, 39, 67, 0.4);
         }
+        .dm-btn:active { transform: scale(0.98); }
         p { font-size: 0.85rem; color: #666; margin-top: 15px; line-height: 1.5; }
 
-        /* 관리자 모드 패널 */
-        #admin-panel { display: none; margin-top: 20px; padding: 15px; background: white; border-radius: 20px; border: 1px dashed #333; }
-        #admin-panel input { width: 80%; padding: 10px; margin: 5px; border-radius: 10px; border: 1px solid #ddd; }
+        /* 관리자 패널 (비밀 버튼 클릭 시 등장) */
+        #admin-panel { display: none; margin-top: 20px; padding: 20px; background: white; border-radius: 20px; border: 2px dashed #ccc; }
+        #admin-panel input { width: 85%; padding: 10px; margin: 5px; border: 1px solid #ddd; border-radius: 10px; }
+        #admin-panel button { padding: 10px 20px; background: #1d1d1f; color: white; border-radius: 10px; border: none; cursor: pointer; font-weight: bold; }
         #secret-trigger { width: 40px; height: 40px; position: fixed; bottom: 0; right: 0; z-index: 999; }
     </style>
 </head>
@@ -59,7 +61,7 @@
     <div class="header-box">
         <h1>디지털 전광판 100 프로젝트</h1>
         <div class="status-bar">
-            24H 렌탈 : 1,000원 (오픈 이벤트 2배 적용)
+            하루 렌탈: 1,000원 (오픈 이벤트 48H 노출)
         </div>
     </div>
 
@@ -68,25 +70,26 @@
     <div class="info-panel">
         <div class="price-info" id="selected-info">원하는 칸을 선택하세요</div>
         <a href="https://www.instagram.com/사장님_아이디/" target="_blank" class="dm-btn">
-            인스타 DM으로 광고하기
+            인스타 DM으로 광고 신청
         </a>
         <p>칸 번호와 사진을 DM으로 보내주시면<br>확인 즉시 업로드 및 타이머가 시작됩니다.</p>
     </div>
 
     <!-- 관리자 패널 -->
     <div id="admin-panel">
-        <h3>AD MANAGER</h3>
-        <input type="number" id="cell-num" placeholder="칸 번호">
+        <h3>관리자: 광고 게시</h3>
+        <input type="number" id="cell-num" placeholder="칸 번호 (1-100)">
         <input type="text" id="img-url" placeholder="이미지 URL">
-        <input type="number" id="ad-hours" placeholder="시간 (24 입력 시 48시간)">
-        <button onclick="addAd()" style="padding:10px 20px; cursor:pointer;">즉시 게시</button>
+        <input type="number" id="ad-hours" placeholder="신청 시간 (예: 24)">
+        <button onclick="addAd()">게시하기</button>
     </div>
 
+    <!-- 우측 하단 투명 버튼 -->
     <div id="secret-trigger" onclick="openAdmin()"></div>
 
     <script>
         const gridContainer = document.getElementById('grid-container');
-        let adData = {}; // 실시간 광고 데이터
+        let adData = {}; 
 
         function initGrid() {
             gridContainer.innerHTML = '';
@@ -99,7 +102,7 @@
                 cell.appendChild(label);
                 updateCell(i, cell);
                 cell.addEventListener('click', () => {
-                    document.getElementById('selected-info').innerText = `${i}번 칸 선택됨`;
+                    document.getElementById('selected-info').innerText = `${i}번 칸 선택 완료!`;
                 });
                 gridContainer.appendChild(cell);
             }
@@ -133,7 +136,7 @@
             const n = document.getElementById('cell-num').value;
             const u = document.getElementById('img-url').value;
             const h = document.getElementById('ad-hours').value;
-            // 수동 타이머 설정 + 이벤트 2배
+            if(!n || !u || !h) return alert("전부 입력하세요!");
             adData[n] = { url: u, expiry: Date.now() + (h * 2 * 3600000) };
             initGrid();
             alert("게시 완료!");
