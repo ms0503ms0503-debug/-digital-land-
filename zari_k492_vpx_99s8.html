@@ -3,68 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <title>관리자 패널</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <style>
         body { font-family: sans-serif; padding: 20px; background: #f0f0f0; max-width: 500px; margin: 0 auto; }
         .card { background: white; padding: 20px; border-radius: 15px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        label { font-size: 0.8rem; font-weight: bold; color: #666; margin-top: 10px; display: block; }
         input, button { width: 100%; padding: 12px; margin: 5px 0; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; }
-        button { background: #d4a373; color: white; font-weight: bold; border: none; cursor: pointer; }
-        .red-btn { background: #dc2743; margin-top: 10px; }
+        button { background: #d4a373; color: white; border: none; cursor: pointer; font-weight: bold; }
+        .red { background: #dc2743; }
     </style>
 </head>
 <body>
-    <h1>🤫 실전 관리자 페이지</h1>
+    <h1>🤫 실전 관리 본부</h1>
     <div class="card">
-        <strong>1. 멘트 및 가격표 수정</strong>
-        <label>상단 배지</label><input type="text" id="edit-badge">
-        <label>메인 제목</label><input type="text" id="edit-title">
-        <label>상세 설명</label><input type="text" id="edit-sub">
-        <hr>
-        <label>24시간 가격</label><input type="text" id="edit-p1">
-        <label>1주일 가격</label><input type="text" id="edit-p2">
-        <label>1개월 가격</label><input type="text" id="edit-p3">
-        <button onclick="saveText()">수정 내용 저장</button>
+        <strong>1. 실시간 문구/가격 수정</strong>
+        <input type="text" id="badge" placeholder="배지"><input type="text" id="title" placeholder="제목"><input type="text" id="sub" placeholder="설명">
+        <input type="text" id="p1" placeholder="가격1"><input type="text" id="p2" placeholder="가격2"><input type="text" id="p3" placeholder="가격3">
+        <button onclick="saveText()">서버로 즉시 반영</button>
     </div>
     <div class="card">
-        <strong>2. 광고 등록 (1~150번)</strong>
-        <input type="number" id="cell-num" placeholder="칸 번호">
-        <input type="text" id="img-url" placeholder="이미지 주소(URL)">
-        <input type="number" id="ad-hours" placeholder="노출 시간(시간 단위)">
-        <button onclick="addAd()" class="red-btn">광고 즉시 등록</button>
+        <strong>2. 광고 실시간 등록</strong>
+        <input type="number" id="num" placeholder="칸 번호"><input type="text" id="url" placeholder="이미지 주소"><input type="number" id="hrs" placeholder="시간(h)">
+        <button onclick="addAd()" class="red">광고 즉시 분양</button>
     </div>
 
     <script>
-        const TEXT_KEY = 'dotzari_text_v1';
-        const STORAGE_KEY = 'dotzari_data_v1';
-
-        const old = JSON.parse(localStorage.getItem(TEXT_KEY)) || {};
-        document.getElementById('edit-badge').value = old.badge || "OPEN EVENT 🎁";
-        document.getElementById('edit-title').value = old.title || "돗자리";
-        document.getElementById('edit-sub').value = old.sub || "지금 입점하면 광고 시간 2배!";
-        document.getElementById('edit-p1').value = old.p1 || "5,000원";
-        document.getElementById('edit-p2').value = old.p2 || "30,000원";
-        document.getElementById('edit-p3').value = old.p3 || "100,000원";
+        const firebaseConfig = {
+            apiKey: "AIzaSyA8smXxxCJWa1OrrBxnJG2oN4R2T5NKStY",
+            authDomain: "dotzari.firebaseapp.com",
+            databaseURL: "https://dotzari-default-rtdb.firebaseio.com",
+            projectId: "dotzari",
+            storageBucket: "dotzari.firebasestorage.app",
+            messagingSenderId: "999257002195",
+            appId: "1:999257002195:web:184f3716dd05a862600426"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
         function saveText() {
-            localStorage.setItem(TEXT_KEY, JSON.stringify({
-                badge: document.getElementById('edit-badge').value,
-                title: document.getElementById('edit-title').value,
-                sub: document.getElementById('edit-sub').value,
-                p1: document.getElementById('edit-p1').value,
-                p2: document.getElementById('edit-p2').value,
-                p3: document.getElementById('edit-p3').value
-            }));
-            alert("정보가 저장되었습니다!");
+            db.ref('text').set({
+                badge: document.getElementById('badge').value,
+                title: document.getElementById('title').value,
+                sub: document.getElementById('sub').value,
+                p1: document.getElementById('p1').value,
+                p2: document.getElementById('p2').value,
+                p3: document.getElementById('p3').value
+            }).then(() => alert("전 세계 동기화 완료!"));
         }
 
         function addAd() {
-            let adData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
-            const n = document.getElementById('cell-num').value;
-            const u = document.getElementById('img-url').value;
-            const h = document.getElementById('ad-hours').value;
-            adData[n] = { url: u, expiry: Date.now() + (h * 3600000) };
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(adData));
-            alert(n + "번 칸에 광고 등록 완료!");
+            const n = document.getElementById('num').value;
+            db.ref('ads/' + n).set({
+                url: document.getElementById('url').value,
+                expiry: Date.now() + (document.getElementById('hrs').value * 3600000)
+            }).then(() => alert(n + "번 칸 분양 시작!"));
         }
     </script>
 </body>
