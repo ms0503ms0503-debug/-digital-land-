@@ -1,9 +1,20 @@
-/* 기존 내용에 추가하거나 덮어쓰세요 */
+body {
+    font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+    text-align: center;
+    background-color: #f8f9fa;
+    margin: 0;
+    padding: 20px;
+}
+
+header {
+    margin-bottom: 20px;
+}
+
 .status-bar {
     background: #333;
     color: #fff;
-    padding: 10px;
-    border-radius: 5px;
+    padding: 10px 20px;
+    border-radius: 50px;
     display: inline-block;
     margin-bottom: 10px;
     font-weight: bold;
@@ -13,23 +24,60 @@
     color: #ff4757;
     font-weight: bold;
     font-size: 0.9rem;
-    animation: blink 1s infinite;
 }
 
-@keyframes blink {
-    50% { opacity: 0.5; }
+/* 땅 격자판 설정 */
+#grid-container {
+    display: grid;
+    /* 가로 50칸 설정 */
+    grid-template-columns: repeat(50, 12px);
+    gap: 1px;
+    background-color: #ddd;
+    border: 3px solid #333;
+    width: fit-content;
+    margin: 0 auto;
+    padding: 1px;
 }
 
+/* 개별 칸 설정 */
+.cell {
+    width: 12px;
+    height: 12px;
+    background-color: white;
+    cursor: pointer;
+}
+
+.cell:hover {
+    background-color: #ffeb3b;
+}
+
+/* 판매된 칸 (빨간색) */
+.cell.sold {
+    background-color: #ff5252;
+}
+
+/* 이벤트 보물 칸 (파란색) */
 .cell.event {
-    background-color: #70a1ff !important; /* 이벤트 칸은 파란색 */
+    background-color: #70a1ff !important;
+}
+
+.info-panel {
+    margin-top: 30px;
+    padding: 20px;
+    background: white;
+    display: inline-block;
+    border-radius: 15px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
 }
 
 .buy-btn {
+    padding: 15px 40px;
+    font-size: 1.1rem;
+    font-weight: bold;
     background: linear-gradient(45deg, #ff4757, #ff6b81);
+    color: white;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
     box-shadow: 0 5px 15px rgba(255, 71, 87, 0.4);
-    transition: transform 0.2s;
-}
-
-.buy-btn:hover {
-    transform: scale(1.05);
 }
