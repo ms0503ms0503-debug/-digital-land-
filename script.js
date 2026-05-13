@@ -1,19 +1,35 @@
-const gridContainer = document.getElementById('grid-container');
-const totalCells = 1000; // 1,000개 샘플 생성
+</* 기존 내용에 추가하거나 덮어쓰세요 */
+.status-bar {
+    background: #333;
+    color: #fff;
+    padding: 10px;
+    border-radius: 5px;
+    display: inline-block;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
 
-for (let i = 0; i < totalCells; i++) {
-    const cell = document.createElement('div');
-    cell.classList.add('cell');
-    
-    // 약 5%의 확률로 이미 팔린 땅처럼 보이게 설정 (바이럴 효과)
-    if (Math.random() > 0.95) {
-        cell.classList.add('sold');
-    }
+#next-price-info {
+    color: #ff4757;
+    font-weight: bold;
+    font-size: 0.9rem;
+    animation: blink 1s infinite;
+}
 
-    // 클릭했을 때 반응
-    cell.addEventListener('click', () => {
-        alert(`${i + 1}번째 위치를 선택하셨습니다. 곧 분양이 시작됩니다!`);
-    });
+@keyframes blink {
+    50% { opacity: 0.5; }
+}
 
-    gridContainer.appendChild(cell);
+.cell.event {
+    background-color: #70a1ff !important; /* 이벤트 칸은 파란색 */
+}
+
+.buy-btn {
+    background: linear-gradient(45deg, #ff4757, #ff6b81);
+    box-shadow: 0 5px 15px rgba(255, 71, 87, 0.4);
+    transition: transform 0.2s;
+}
+
+.buy-btn:hover {
+    transform: scale(1.05);
 }
