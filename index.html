@@ -6,22 +6,23 @@
     <title>돗자리 (DOT-ZARI)</title>
     <style>
         body { font-family: 'Apple SD Gothic Neo', sans-serif; text-align: center; background-color: #fdfaf4; margin: 0; padding: 15px; }
-        .header-box { background: #ffffff; padding: 30px 20px; border-radius: 30px; margin-bottom: 20px; border: 1.5px solid #f0ede5; box-shadow: 0 10px 25px rgba(212,163,115,0.08); }
+        .header-box { background: #ffffff; padding: 30px 20px; border-radius: 30px; margin-bottom: 20px; border: 1.5px solid #f0ede5; box-shadow: 0 10px 25px rgba(212,163,115,0.08); position: relative; }
         .event-badge { display: inline-block; background: #dc2743; color: #fff; padding: 4px 12px; border-radius: 8px; font-weight: 800; font-size: 0.9rem; margin-bottom: 10px; animation: blink 1s infinite; }
         @keyframes blink { 50% { opacity: 0.6; } }
         h1 { font-size: 2.2rem; margin: 0; color: #d4a373; font-weight: 900; }
         .sub-title { font-size: 1.1rem; color: #5a564e; margin: 10px 0; font-weight: 800; }
-        
-        /* 가격표 테이블 디자인 */
-        .price-container { margin: 20px auto; max-width: 500px; background: #fff9f0; border-radius: 20px; padding: 15px; border: 1px dashed #d4a373; }
-        .price-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
-        .price-table th { color: #888; padding: 8px; border-bottom: 1px solid #eee; }
-        .price-table td { padding: 10px; font-weight: bold; color: #333; border-bottom: 1px solid #eee; }
-        .highlight-price { color: #dc2743; font-weight: 900; font-size: 1.1rem; }
+
+        /* 가격표 보기 버튼 및 팝업 기능 유지 */
+        .price-btn { background: #d4a373; color: white; border: none; padding: 8px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        #price-display { display: none; margin-top: 15px; padding: 15px; background: #fff9f0; border-radius: 15px; border: 1px dashed #d4a373; }
 
         #grid-container { display: grid; grid-template-columns: repeat(10, 1fr); gap: 2px; background-color: #e9e5d9; border: 4px solid #fff; border-radius: 15px; width: 100%; max-width: 500px; margin: 0 auto; padding: 3px; }
-        .cell { background-color: #fff; aspect-ratio: 1 / 1; border-radius: 2px; }
+        .cell { background-color: #fff; aspect-ratio: 1 / 1; border-radius: 2px; cursor: pointer; transition: 0.2s; }
+        
+        /* 칸 누르면 색 칠해지는 기능 */
+        .cell.selected { background-color: #ffe8d6 !important; border: 1px solid #d4a373; }
         .cell.occupied { background-size: cover; background-position: center; }
+
         .dm-btn { display: block; width: 90%; max-width: 400px; margin: 30px auto; padding: 20px; font-size: 1.3rem; font-weight: 900; background: linear-gradient(45deg, #f09433, #dc2743, #cc2366); color: white; border-radius: 30px; text-decoration: none; box-shadow: 0 10px 20px rgba(220,39,67,0.2); }
     </style>
 </head>
@@ -29,19 +30,12 @@
     <div class="header-box">
         <div id="view-badge" class="event-badge">OPEN EVENT 🎁</div>
         <h1 id="view-title">돗자리</h1>
-        <div id="view-sub" class="sub-title">데이터 불러오는 중...</div>
-        
-        <div class="price-container">
-            <table class="price-table">
-                <thead>
-                    <tr><th>구분</th><th>시간</th><th>금액</th></tr>
-                </thead>
-                <tbody>
-                    <tr><td>기본 분양</td><td>24시간</td><td class="highlight-price" id="p1">5,000원</td></tr>
-                    <tr><td>집중 노출</td><td>1주일</td><td class="highlight-price" id="p2">30,000원</td></tr>
-                    <tr><td>장기 분양</td><td>1개월</td><td class="highlight-price" id="p3">100,000원</td></tr>
-                </tbody>
-            </table>
+        <div id="view-sub" class="sub-title">불러오는 중...</div>
+        <button class="price-btn" onclick="togglePrice()">💰 분양 가격표 보기</button>
+        <div id="price-display">
+            <p>📍 24시간: <span id="p1">5,000원</span></p>
+            <p>📍 1주일: <span id="p2">30,000원</span></p>
+            <p>📍 1개월: <span id="p3">100,000원</span></p>
         </div>
     </div>
 
@@ -52,19 +46,19 @@
         const STORAGE_KEY = 'dotzari_data_v1';
         const TEXT_KEY = 'dotzari_text_v1';
 
+        function togglePrice() {
+            const disp = document.getElementById('price-display');
+            disp.style.display = disp.style.display === 'block' ? 'none' : 'block';
+        }
+
         function loadContent() {
-            const textData = JSON.parse(localStorage.getItem(TEXT_KEY)) || {
-                badge: "OPEN EVENT 🎁",
-                title: "돗자리 ⛺️",
-                sub: "입점하면 광고 시간 2배!",
-                p1: "5,000원", p2: "30,000원", p3: "100,000원"
-            };
-            document.getElementById('view-badge').innerText = textData.badge;
-            document.getElementById('view-title').innerText = textData.title;
-            document.getElementById('view-sub').innerText = textData.sub;
-            document.getElementById('p1').innerText = textData.p1;
-            document.getElementById('p2').innerText = textData.p2;
-            document.getElementById('p3').innerText = textData.p3;
+            const textData = JSON.parse(localStorage.getItem(TEXT_KEY)) || {};
+            document.getElementById('view-badge').innerText = textData.badge || "OPEN EVENT 🎁";
+            document.getElementById('view-title').innerText = textData.title || "돗자리";
+            document.getElementById('view-sub').innerText = textData.sub || "지금 입점하면 광고 시간 2배!";
+            document.getElementById('p1').innerText = textData.p1 || "5,000원";
+            document.getElementById('p2').innerText = textData.p2 || "30,000원";
+            document.getElementById('p3').innerText = textData.p3 || "100,000원";
 
             const adData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
             const grid = document.getElementById('grid-container');
@@ -76,6 +70,10 @@
                     cell.style.backgroundImage = `url('${adData[i].url}')`;
                     cell.classList.add('occupied');
                 }
+                // 칸 누르면 색 칠해지는 기능 복구
+                cell.onclick = function() {
+                    this.classList.toggle('selected');
+                };
                 grid.appendChild(cell);
             }
         }
