@@ -3,73 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Digital Land 10,000</title>
+    <title>Digital Land - 인스타 DM 분양 중</title>
     <style>
-        /* 디자인 코드를 여기에 합쳤습니다 */
-        body { font-family: 'Apple SD Gothic Neo', sans-serif; text-align: center; background-color: #f8f9fa; margin: 0; padding: 20px; }
-        .status-bar { background: #333; color: #fff; padding: 10px 20px; border-radius: 50px; display: inline-block; margin-bottom: 10px; font-weight: bold; }
-        #next-price-info { color: #ff4757; font-weight: bold; font-size: 0.9rem; margin-bottom: 20px; }
+        body { font-family: 'Apple SD Gothic Neo', sans-serif; text-align: center; background-color: #f0f2f5; margin: 0; padding: 20px; color: #1c1e21; }
+        .header-box { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        h1 { font-size: 1.5rem; margin-bottom: 10px; color: #1d1d1f; }
+        .status-bar { background: #1d1d1f; color: #fff; padding: 12px 25px; border-radius: 50px; display: inline-block; font-weight: bold; font-size: 0.9rem; }
+        
+        /* 땅 격자판 */
         #grid-container { 
             display: grid; 
-            grid-template-columns: repeat(50, 12px); 
-            gap: 1px; 
+            grid-template-columns: repeat(20, 1fr); /* 모바일 대응: 가로 20칸 */
+            gap: 2px; 
             background-color: #ddd; 
-            border: 3px solid #333; 
-            width: fit-content; 
-            margin: 0 auto; 
-            padding: 1px; 
+            border: 2px solid #1d1d1f; 
+            width: 95%; 
+            max-width: 500px; 
+            margin: 20px auto; 
+            aspect-ratio: 1 / 1;
         }
-        .cell { width: 12px; height: 12px; background-color: white; cursor: pointer; }
-        .cell:hover { background-color: #ffeb3b; }
-        .cell.sold { background-color: #ff5252; }
-        .cell.event { background-color: #70a1ff !important; }
-        .info-panel { margin-top: 30px; padding: 20px; background: white; display: inline-block; border-radius: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
-        .buy-btn { padding: 15px 40px; font-size: 1.1rem; font-weight: bold; background: linear-gradient(45deg, #ff4757, #ff6b81); color: white; border: none; border-radius: 30px; cursor: pointer; }
+        .cell { background-color: white; border-radius: 1px; cursor: pointer; transition: 0.2s; position: relative; }
+        .cell:hover { background-color: #ffeb3b; transform: scale(1.1); z-index: 10; }
+        
+        /* 이미지가 들어간 칸 */
+        .cell.occupied { background-size: cover; background-position: center; border: none; }
+        
+        /* 하단 안내창 */
+        .info-panel { margin-top: 20px; padding: 25px; background: white; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 90%; max-width: 400px; display: inline-block; }
+        .price-info { color: #ff3b30; font-weight: bold; font-size: 1.2rem; margin-bottom: 15px; }
+        
+        /* 인스타 연결 버튼 */
+        .dm-btn { 
+            display: block; width: 100%; padding: 18px; font-size: 1.1rem; font-weight: bold; 
+            background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); 
+            color: white; border: none; border-radius: 15px; text-decoration: none; cursor: pointer;
+            box-shadow: 0 4px 15px rgba(220, 39, 67, 0.4);
+        }
+        .dm-btn:active { transform: scale(0.98); }
+        p { font-size: 0.85rem; color: #666; margin-top: 15px; line-height: 1.5; }
     </style>
 </head>
 <body>
-    <header>
-        <h1>디지털 땅 10,000 프로젝트</h1>
-        <div class="status-bar">
-            <span id="price-tag">현재 시세: 1,000원</span> | 
-            <span id="sold-count">분양 완료: 8 / 10,000</span>
-        </div>
-        <p id="next-price-info">다음 가격 인상까지 2칸 남았습니다!</p>
-    </header>
 
-    <main>
-        <div id="grid-container"></div>
-        <div class="info-panel">
-            <h3 id="selected-info">칸을 선택해 주세요</h3>
-            <button class="buy-btn" onclick="openEnroll()">지금 이 가격에 선점하기</button>
+    <div class="header-box">
+        <h1>디지털 부동산 10,000 프로젝트</h1>
+        <div class="status-bar">
+            현재가: 1,000원 / <span id="sold-count">0</span>칸 분양됨
         </div>
-    </main>
+    </div>
+
+    <div id="grid-container"></div>
+
+    <div class="info-panel">
+        <div class="price-info">🔥 다음 가격 인상까지 단 10칸!</div>
+        <a href="https://www.instagram.com/사장님_아이디/" target="_blank" class="dm-btn">
+            인스타 DM으로 내 땅 사기
+        </a>
+        <p>칸 번호와 사진을 DM으로 보내주시면<br>확인 즉시 업로드 및 분양권 증서를 보내드립니다.</p>
+    </div>
 
     <script>
-        /* 기능 코드를 여기에 합쳤습니다 */
         const gridContainer = document.getElementById('grid-container');
-        let soldCount = 8; 
-        const eventCells = [15, 42, 88, 120]; 
+        
+        /* [중요] 사장님이 수정할 부분: 사진 주인 데이터 */
+        const landOwners = {
+            1: "https://via.placeholder.com/50", // 1번칸 예시 이미지
+            22: "https://via.placeholder.com/50" // 22번칸 예시 이미지
+            // 사진을 받은 뒤 여기에 [칸번호: "이미지주소"] 를 추가하면 끝!
+        };
 
-        for (let i = 1; i <= 1000; i++) {
+        const totalCells = 400; // 가로20 x 세로20 (모바일에서 보기 좋은 사이즈)
+        let soldCount = Object.keys(landOwners).length;
+        document.getElementById('sold-count').innerText = soldCount;
+
+        for (let i = 1; i <= totalCells; i++) {
             const cell = document.createElement('div');
             cell.classList.add('cell');
-            if (i <= soldCount) cell.classList.add('sold');
-            if (eventCells.includes(i)) cell.classList.add('event');
+
+            // 사진이 등록된 칸인지 확인
+            if (landOwners[i]) {
+                cell.classList.add('occupied');
+                cell.style.backgroundImage = `url('${landOwners[i]}')`;
+            }
 
             cell.addEventListener('click', () => {
-                if (eventCells.includes(i)) {
-                    alert("🎊 보물 칸 발견! 사전 예약 시 1칸 무료 증정!");
+                if (landOwners[i]) {
+                    alert(`${i}번 땅은 이미 주인이 있습니다!`);
                 } else {
-                    document.getElementById('selected-info').innerText = `${i}번 칸이 선택되었습니다.`;
+                    alert(`${i}번 땅은 현재 1,000원에 구매 가능합니다.\n인스타 DM을 보내주세요!`);
                 }
             });
             gridContainer.appendChild(cell);
-        }
-
-        function openEnroll() {
-            const email = prompt("이 가격은 곧 마감됩니다! 알림을 받으실 이메일을 남겨주세요.");
-            if(email) alert("감사합니다! 정식 오픈 시 연락드리겠습니다.");
         }
     </script>
 </body>
