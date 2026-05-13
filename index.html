@@ -3,148 +3,136 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DIGITAL LAND 1,000 - OFFICIAL OPEN</title>
+    <title>Digital Board 100</title>
     <style>
-        body { font-family: 'Apple SD Gothic Neo', sans-serif; text-align: center; background-color: #f8f9fa; margin: 0; padding: 20px; color: #333; }
-        header { margin-bottom: 25px; }
-        
-        /* 상태바: 자동 업데이트 로직 반영 */
-        .status-bar { background: #000; color: #fff; padding: 14px 28px; border-radius: 50px; display: inline-block; margin-bottom: 15px; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.2); font-size: 0.95rem; }
-        .highlight { color: #00ff88; } /* 강조색을 정식 오픈 느낌의 그린으로 변경 */
+        /* [처음 UI 그대로] 깔끔한 화이트톤 스타일 */
+        body { font-family: sans-serif; text-align: center; background-color: #ffffff; margin: 0; padding: 20px; }
+        header { margin-bottom: 20px; }
+        .status-bar { background: #333; color: #fff; padding: 10px 20px; border-radius: 50px; display: inline-block; margin-bottom: 10px; font-weight: bold; }
 
-        /* 1,000칸 격자판 */
+        /* [GRID] 100칸 (가로 10 x 세로 10) */
         #grid-container { 
             display: grid; 
-            grid-template-columns: repeat(25, 1fr); 
+            grid-template-columns: repeat(10, 1fr); 
             gap: 1px; 
             background-color: #ccc; 
-            border: 2px solid #000; 
+            border: 2px solid #333; 
             width: 100%; 
-            max-width: 600px; 
+            max-width: 500px; 
             margin: 0 auto; 
-            aspect-ratio: 25 / 40;
-            background-color: #eee;
+            aspect-ratio: 1 / 1;
         }
-        .cell { background-color: white; cursor: pointer; transition: 0.1s; }
-        .cell:hover { background-color: #00ff88; z-index: 10; transform: scale(1.1); }
+        .cell { background-color: white; position: relative; cursor: pointer; }
+        .cell:hover { background-color: #ffeb3b; }
         .cell.occupied { background-size: cover; background-position: center; border: none; }
-
-        /* 정식 오픈 광고 패널 */
-        .info-panel { margin-top: 30px; padding: 30px; background: white; display: inline-block; border-radius: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); width: 90%; max-width: 480px; border: 1px solid #eee; }
-        .main-copy { font-size: 1.4rem; font-weight: 900; color: #000; display: block; margin-bottom: 5px; letter-spacing: -0.5px; }
-        .sub-copy { color: #ff4757; font-weight: bold; font-size: 1.1rem; margin-bottom: 20px; display: block; }
         
-        .dm-btn { 
-            display: block; padding: 20px; font-size: 1.2rem; font-weight: bold; 
-            background: #000; color: white; border-radius: 18px; text-decoration: none; cursor: pointer;
-            transition: 0.3s;
+        /* 타이머 라벨 (처음 UI를 해치지 않게 아주 얇게 표시) */
+        .timer-label { 
+            position: absolute; bottom: 0; left: 0; width: 100%; 
+            background: rgba(0,0,0,0.6); color: #fff; 
+            font-size: 0.5rem; padding: 1px 0;
+            display: none; 
         }
-        .dm-btn:hover { background: #333; transform: translateY(-3px); }
+        .occupied .timer-label { display: block; }
 
-        /* 관리자 모드 숨김 */
-        #admin-panel { display: none; margin-top: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 15px; background: #f9f9f9; }
-        #admin-panel input { padding: 10px; margin: 5px; border-radius: 8px; border: 1px solid #ddd; width: 80%; }
-        #secret-trigger { width: 50px; height: 50px; position: fixed; bottom: 0; right: 0; z-index: 999; }
+        /* [INFO] 첫 번째 버전의 깔끔한 안내창 */
+        .info-panel { margin-top: 20px; padding: 20px; background: white; border: 1px solid #ddd; display: inline-block; border-radius: 10px; }
+        .dm-btn { 
+            display: inline-block; padding: 15px 30px; background-color: #ff4757; 
+            color: white; text-decoration: none; border-radius: 5px; font-weight: bold; margin-top: 10px;
+        }
+
+        /* 관리자 모드 */
+        #admin-panel { display: none; margin-top: 20px; padding: 15px; border: 1px dashed #333; background: #f9f9f9; }
+        #secret-trigger { width: 40px; height: 40px; position: fixed; bottom: 0; right: 0; }
     </style>
 </head>
 <body>
 
     <header>
-        <p style="font-weight: bold; letter-spacing: 2px; color: #888; margin-bottom: 5px;">OFFICIAL LAUNCH</p>
-        <h1>DIGITAL LAND 1,000</h1>
+        <h1>디지털 전광판 100</h1>
         <div class="status-bar">
-            현재가: <span id="current-price">1,000</span>원 | <span class="highlight" id="cells-left">0</span>칸 남음
+            24시간 렌탈 | 오픈 이벤트: 시간 2배 적용!
         </div>
     </header>
 
-    <main>
-        <div id="grid-container"></div>
-        
-        <div class="info-panel">
-            <span class="main-copy">디지털 부동산 정식 분양 시작</span>
-            <span class="sub-copy" id="promo-text">1단계 선착순 10명: 1,000원</span>
-            <a href="https://www.instagram.com/사장님_아이디/" target="_blank" class="dm-btn">지금 바로 내 땅 선점하기</a>
-            <p style="font-size: 0.85rem; color: #999; margin-top: 20px; line-height: 1.6; text-align: left;">
-                • 1,000칸 한정, 판매 수량에 따라 가격 자동 상승<br>
-                • DM으로 [번호/사진] 전송 시 즉시 업로드<br>
-                • 초기 입주자 정식 오픈 기념 할인권 증정
-            </p>
-        </div>
+    <div id="grid-container"></div>
 
-        <div id="admin-panel">
-            <strong>Manager Mode</strong><br>
-            <input type="number" id="cell-num" placeholder="칸 번호">
-            <input type="text" id="img-url" placeholder="이미지 URL">
-            <button onclick="applyPhoto()" style="padding:10px; cursor:pointer;">테스트 적용</button>
-        </div>
-    </main>
+    <div class="info-panel">
+        <h3 id="selected-info">원하는 칸을 선택하세요</h3>
+        <p>하루 1,000원 (이벤트로 48시간 노출)</p>
+        <a href="https://www.instagram.com/사장님_아이디/" target="_blank" class="dm-btn">인스타 DM으로 신청하기</a>
+    </div>
+
+    <!-- 관리자 패널 (비밀번호: 1234) -->
+    <div id="admin-panel">
+        <h4>광고 등록 (관리자)</h4>
+        <input type="number" id="cell-num" placeholder="칸 번호">
+        <input type="text" id="img-url" placeholder="이미지 URL">
+        <input type="number" id="ad-hours" placeholder="시간 (예: 24)">
+        <button onclick="addAd()">즉시 게시</button>
+    </div>
 
     <div id="secret-trigger" onclick="openAdmin()"></div>
 
     <script>
         const gridContainer = document.getElementById('grid-container');
+        let adData = {}; // 광고 데이터 저장
+
+        function initGrid() {
+            gridContainer.innerHTML = '';
+            for (let i = 1; i <= 100; i++) {
+                const cell = document.createElement('div');
+                cell.id = `cell-${i}`;
+                cell.className = 'cell';
+                const label = document.createElement('div');
+                label.className = 'timer-label';
+                cell.appendChild(label);
+
+                updateCell(i, cell);
+                
+                cell.addEventListener('click', () => {
+                    document.getElementById('selected-info').innerText = `${i}번 칸 선택됨`;
+                });
+                gridContainer.appendChild(cell);
+            }
+        }
+
+        function updateCell(i, el) {
+            const data = adData[i];
+            if (data && data.expiry > Date.now()) {
+                el.classList.add('occupied');
+                el.style.backgroundImage = `url('${data.url}')`;
+                const remain = data.expiry - Date.now();
+                const h = Math.floor(remain / 3600000);
+                const m = Math.floor((remain % 3600000) / 60000);
+                el.querySelector('.timer-label').innerText = `${h}h ${m}m`;
+            } else {
+                el.classList.remove('occupied');
+                el.style.backgroundImage = '';
+                if(adData[i]) delete adData[i];
+            }
+        }
+
+        setInterval(() => {
+            for(let i=1; i<=100; i++) {
+                const el = document.getElementById(`cell-${i}`);
+                if(el) updateCell(i, el);
+            }
+        }, 60000);
+
+        function openAdmin() { if(prompt("암호:") === "1234") document.getElementById('admin-panel').style.display='block'; }
         
-        /* [여기에 사진 추가] 번호: "사진주소" */
-        const landOwners = {
-            1: "https://via.placeholder.com/100",
-            2: "https://via.placeholder.com/100"
-        };
-
-        const totalCells = 1000;
-        const soldCount = Object.keys(landOwners).length;
-
-        // --- [자동 가격 변동 로직] ---
-        let currentPrice = "1,000";
-        let nextStep = 10;
-        let promoMsg = "1단계 선착순 10명: 1,000원";
-
-        if (soldCount >= 10 && soldCount < 50) {
-            currentPrice = "10,000";
-            nextStep = 50;
-            promoMsg = "2단계 분양 중: 10,000원";
-        } else if (soldCount >= 50 && soldCount < 200) {
-            currentPrice = "25,000";
-            nextStep = 200;
-            promoMsg = "3단계 가치 상승 중: 25,000원";
-        } else if (soldCount >= 200) {
-            currentPrice = "35,000+";
-            nextStep = 1000;
-            promoMsg = "프리미엄 분양 구간 진입";
+        function addAd() {
+            const n = document.getElementById('cell-num').value;
+            const u = document.getElementById('img-url').value;
+            const h = document.getElementById('ad-hours').value;
+            adData[n] = { url: u, expiry: Date.now() + (h * 2 * 3600000) };
+            initGrid();
+            alert("게시 완료!");
         }
 
-        // 화면 업데이트
-        document.getElementById('current-price').innerText = currentPrice;
-        document.getElementById('cells-left').innerText = nextStep - soldCount;
-        document.getElementById('promo-text').innerText = promoMsg;
-
-        for (let i = 1; i <= totalCells; i++) {
-            const cell = document.createElement('div');
-            cell.id = `cell-${i}`;
-            cell.classList.add('cell');
-            if (landOwners[i]) {
-                cell.classList.add('occupied');
-                cell.style.backgroundImage = `url('${landOwners[i]}')`;
-            }
-            cell.addEventListener('click', () => {
-                alert(i + "번 칸을 선택하셨습니다. DM으로 구매 문의를 남겨주세요!");
-            });
-            gridContainer.appendChild(cell);
-        }
-
-        function openAdmin() {
-            if(prompt("관리자 암호:") === "1234") document.getElementById('admin-panel').style.display = 'block';
-        }
-
-        function applyPhoto() {
-            const num = document.getElementById('cell-num').value;
-            const url = document.getElementById('img-url').value;
-            const target = document.getElementById(`cell-${num}`);
-            if(target && url) {
-                target.classList.add('occupied');
-                target.style.backgroundImage = `url('${url}')`;
-                alert("테스트 적용 성공!");
-            }
-        }
+        initGrid();
     </script>
 </body>
 </html>
