@@ -12,10 +12,12 @@
         h1 { font-size: 2.2rem; margin: 0; color: #d4a373; font-weight: 900; }
         .sub-title { font-size: 1.1rem; color: #5a564e; margin: 10px 0; font-weight: 800; }
         
-        /* 가격표 스타일 */
-        .price-tag { margin-top: 15px; padding: 12px; background: #fff9f0; border-radius: 15px; border: 1px dashed #d4a373; display: inline-block; min-width: 200px; }
-        .price-label { font-size: 0.85rem; color: #888; font-weight: bold; display: block; margin-bottom: 4px; }
-        .price-value { font-size: 1.2rem; color: #dc2743; font-weight: 900; }
+        /* 가격표 테이블 디자인 */
+        .price-container { margin: 20px auto; max-width: 500px; background: #fff9f0; border-radius: 20px; padding: 15px; border: 1px dashed #d4a373; }
+        .price-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        .price-table th { color: #888; padding: 8px; border-bottom: 1px solid #eee; }
+        .price-table td { padding: 10px; font-weight: bold; color: #333; border-bottom: 1px solid #eee; }
+        .highlight-price { color: #dc2743; font-weight: 900; font-size: 1.1rem; }
 
         #grid-container { display: grid; grid-template-columns: repeat(10, 1fr); gap: 2px; background-color: #e9e5d9; border: 4px solid #fff; border-radius: 15px; width: 100%; max-width: 500px; margin: 0 auto; padding: 3px; }
         .cell { background-color: #fff; aspect-ratio: 1 / 1; border-radius: 2px; }
@@ -25,14 +27,21 @@
 </head>
 <body>
     <div class="header-box">
-        <div id="view-badge" class="event-badge">LOADING...</div>
+        <div id="view-badge" class="event-badge">OPEN EVENT 🎁</div>
         <h1 id="view-title">돗자리</h1>
-        <div id="view-sub" class="sub-title">데이터를 불러오는 중입니다.</div>
+        <div id="view-sub" class="sub-title">데이터 불러오는 중...</div>
         
-        <!-- 가격표 표시 영역 -->
-        <div class="price-tag">
-            <span class="price-label">💰 현재 분양가</span>
-            <span id="view-price" class="price-value">문의 바람</span>
+        <div class="price-container">
+            <table class="price-table">
+                <thead>
+                    <tr><th>구분</th><th>시간</th><th>금액</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>기본 분양</td><td>24시간</td><td class="highlight-price" id="p1">5,000원</td></tr>
+                    <tr><td>집중 노출</td><td>1주일</td><td class="highlight-price" id="p2">30,000원</td></tr>
+                    <tr><td>장기 분양</td><td>1개월</td><td class="highlight-price" id="p3">100,000원</td></tr>
+                </tbody>
+            </table>
         </div>
     </div>
 
@@ -44,19 +53,19 @@
         const TEXT_KEY = 'dotzari_text_v1';
 
         function loadContent() {
-            // 문구 및 가격 불러오기
             const textData = JSON.parse(localStorage.getItem(TEXT_KEY)) || {
                 badge: "OPEN EVENT 🎁",
                 title: "돗자리 ⛺️",
-                sub: "지금 입점하면 광고 시간 2배!",
-                price: "1시간 / 1,000원"
+                sub: "입점하면 광고 시간 2배!",
+                p1: "5,000원", p2: "30,000원", p3: "100,000원"
             };
             document.getElementById('view-badge').innerText = textData.badge;
             document.getElementById('view-title').innerText = textData.title;
             document.getElementById('view-sub').innerText = textData.sub;
-            document.getElementById('view-price').innerText = textData.price;
+            document.getElementById('p1').innerText = textData.p1;
+            document.getElementById('p2').innerText = textData.p2;
+            document.getElementById('p3').innerText = textData.p3;
 
-            // 광고 격자 불러오기
             const adData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
             const grid = document.getElementById('grid-container');
             grid.innerHTML = '';
@@ -71,7 +80,6 @@
             }
         }
         loadContent();
-        window.addEventListener('storage', loadContent);
     </script>
 </body>
 </html>
