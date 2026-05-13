@@ -16,14 +16,19 @@
         #price-display { display: none; margin-top: 15px; padding: 15px; background: #fff9f0; border-radius: 15px; border: 1px dashed #d4a373; }
 
         #grid-container { display: grid; grid-template-columns: repeat(10, 1fr); gap: 2px; background-color: #e9e5d9; border: 4px solid #fff; border-radius: 15px; width: 100%; max-width: 500px; margin: 0 auto; padding: 3px; }
-        .cell { background-color: #fff; aspect-ratio: 1 / 1; border-radius: 2px; cursor: pointer; transition: 0.2s; }
+        .cell { background-color: #fff; aspect-ratio: 1 / 1; border-radius: 2px; cursor: pointer; transition: 0.2s; position: relative; }
         
-        /* 노란색 단일 선택 효과 */
         .cell.selected { background-color: #FFEB3B !important; border: 1.5px solid #FBC02D; outline: none; }
         .cell.occupied { background-size: cover; background-position: center; }
 
         .selection-info { margin-top: 25px; font-size: 1.1rem; font-weight: 800; color: #d4a373; min-height: 1.5rem; }
         .dm-btn { display: block; width: 90%; max-width: 400px; margin: 10px auto 30px auto; padding: 20px; font-size: 1.3rem; font-weight: 900; background: linear-gradient(45deg, #f09433, #dc2743, #cc2366); color: white; border-radius: 30px; text-decoration: none; box-shadow: 0 10px 20px rgba(220,39,67,0.2); }
+
+        /* 확대(모달) 레이아웃[span_2](start_span)[span_2](end_span) */
+        #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; justify-content: center; align-items: center; flex-direction: column; color: white; }
+        #modal-img { max-width: 90%; max-height: 70%; border-radius: 15px; box-shadow: 0 0 30px rgba(255,255,255,0.2); margin-bottom: 20px; }
+        .timer-box { font-size: 1.5rem; font-weight: 900; color: #FFEB3B; background: rgba(0,0,0,0.5); padding: 10px 20px; border-radius: 10px; border: 1px solid #FFEB3B; }
+        .close-modal { position: absolute; top: 20px; right: 20px; font-size: 2rem; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -43,13 +48,34 @@
     <div id="selection-text" class="selection-info">원하는 자리를 클릭해보세요!</div>
     <a href="https://www.instagram.com/my.dotzari/" target="_blank" class="dm-btn">이벤트 참여하기 (DM)</a>
 
+    <!-- 확대창(모달) 구조[span_3](start_span)[span_3](end_span) -->
+    <div id="modal" onclick="closeModal()">
+        <span class="close-modal">&times;</span>
+        <img id="modal-img" src="" alt="확대 광고">
+        <div id="timer" class="timer-box">남은 시간: 계산 중...</div>
+    </div>
+
     <script>
         const STORAGE_KEY = 'dotzari_data_v1';
         const TEXT_KEY = 'dotzari_text_v1';
+        let timerInterval;
 
         function togglePrice() {
             const disp = document.getElementById('price-display');
             disp.style.display = disp.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+            clearInterval(timerInterval);
+        }
+
+        function formatTime(ms) {
+            if (ms <= 0) return "광고 종료";
+            const h = Math.floor(ms / 3600000);
+            const m = Math.floor((ms % 3600000) / 60000);
+            const s = Math.floor((ms % 60000) / 1000);
+            return h + "시간 " + m + "분 " + s + "초";
         }
 
         function loadContent() {
@@ -69,22 +95,41 @@
             for (let i = 1; i <= 150; i++) {
                 const cell = document.createElement('div');
                 cell.className = 'cell';
-                if (adData[i] && adData[i].expiry > Date.now()) {
-                    cell.style.backgroundImage = `url('${adData[i].url}')`;
+                const ad = adData[i];
+                const isOccupied = ad && ad.expiry > Date.now();
+
+                if (isOccupied) {
+                    cell.style.backgroundImage = `url('${ad.url}')`;
                     cell.classList.add('occupied');
                 }
                 
-                cell.onclick = function() {
-                    // 1. 기존에 선택된 노란색 칸들을 모두 찾아서 지움 (단일 선택 기능)
-                    const prevSelected = document.querySelectorAll('.cell.selected');
-                    prevSelected.forEach(c => c.classList.remove('selected'));
-                    
-                    // 2. 현재 누른 칸에만 노란색 입히기
-                    this.classList.add('selected');
-                    
-                    // 3. 안내 문구 변경 (알림창 없이 바로 반영)
-                    selectionText.innerText = "선택하신 자리는 " + i + "번입니다!";
-                    selectionText.style.color = "#dc2743"; 
+                cell.onclick = function(e) {
+                    // 이미 광고가 있는 칸을 누르면 확대 및 타이머 작동[span_4](start_span)[span_4](end_span)
+                    if (isOccupied) {
+                        e.stopPropagation();
+                        const modal = document.getElementById('modal');
+                        const modalImg = document.getElementById('modal-img');
+                        const timerDisp = document.getElementById('timer');
+                        
+                        modalImg.src = ad.url;
+                        modal.style.display = 'flex';
+
+                        clearInterval(timerInterval);
+                        const updateTimer = () => {
+                            const remain = ad.expiry - Date.now();
+                            timerDisp.innerText = "남은 분양 시간: " + formatTime(remain);
+                            if (remain <= 0) closeModal();
+                        };
+                        updateTimer();
+                        timerInterval = setInterval(updateTimer, 1000);
+                    } else {
+                        // 빈 자리면 노란색 선택 기능[span_5](start_span)[span_5](end_span)
+                        const prevSelected = document.querySelectorAll('.cell.selected');
+                        prevSelected.forEach(c => c.classList.remove('selected'));
+                        this.classList.add('selected');
+                        selectionText.innerText = "선택하신 자리는 " + i + "번입니다!";
+                        selectionText.style.color = "#dc2743";
+                    }
                 };
                 grid.appendChild(cell);
             }
