@@ -12,15 +12,14 @@
         h1 { font-size: 2.2rem; margin: 0; color: #d4a373; font-weight: 900; }
         .sub-title { font-size: 1.1rem; color: #5a564e; margin: 10px 0; font-weight: 800; }
 
-        /* 가격표 보기 버튼 및 팝업 기능 유지 */
         .price-btn { background: #d4a373; color: white; border: none; padding: 8px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         #price-display { display: none; margin-top: 15px; padding: 15px; background: #fff9f0; border-radius: 15px; border: 1px dashed #d4a373; }
 
         #grid-container { display: grid; grid-template-columns: repeat(10, 1fr); gap: 2px; background-color: #e9e5d9; border: 4px solid #fff; border-radius: 15px; width: 100%; max-width: 500px; margin: 0 auto; padding: 3px; }
         .cell { background-color: #fff; aspect-ratio: 1 / 1; border-radius: 2px; cursor: pointer; transition: 0.2s; }
         
-        /* 칸 누르면 색 칠해지는 기능 */
-        .cell.selected { background-color: #ffe8d6 !important; border: 1px solid #d4a373; }
+        /* 클릭 시 색상을 노랑색(#FFEB3B)으로 변경 */
+        .cell.selected { background-color: #FFEB3B !important; border: 1.5px solid #FBC02D; }
         .cell.occupied { background-size: cover; background-position: center; }
 
         .dm-btn { display: block; width: 90%; max-width: 400px; margin: 30px auto; padding: 20px; font-size: 1.3rem; font-weight: 900; background: linear-gradient(45deg, #f09433, #dc2743, #cc2366); color: white; border-radius: 30px; text-decoration: none; box-shadow: 0 10px 20px rgba(220,39,67,0.2); }
@@ -70,8 +69,13 @@
                     cell.style.backgroundImage = `url('${adData[i].url}')`;
                     cell.classList.add('occupied');
                 }
-                // 칸 누르면 색 칠해지는 기능 복구
+                
+                // 클릭 이벤트: 알림창 띄우기 + 노랑색 토글
                 cell.onclick = function() {
+                    const isSelected = this.classList.contains('selected');
+                    if (!isSelected) {
+                        alert(i + "번 자리를 선택하셨습니다! DM으로 번호를 말씀해주세요.");
+                    }
                     this.classList.toggle('selected');
                 };
                 grid.appendChild(cell);
