@@ -5,197 +5,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>돗자리 (DOT-ZARI)</title>
     <style>
-        body { 
-            font-family: 'Apple SD Gothic Neo', sans-serif; 
-            text-align: center; 
-            background-color: #fdfaf4;
-            background-image: radial-gradient(#efede6 1.2px, transparent 1.2px);
-            background-size: 25px 25px;
-            margin: 0; padding: 15px; color: #5a564e; 
-        }
-        
-        .header-box { 
-            background: #ffffff; 
-            padding: 40px 20px; border-radius: 40px; 
-            box-shadow: 0 15px 30px rgba(212, 163, 115, 0.1); 
-            margin-bottom: 25px; border: 2px solid #f0ede5; 
-        }
-        
-        /* 멘트 수정: 참신하고 직관적으로 */
-        h1 { 
-            font-size: 2.5rem; margin: 0; 
-            color: #d4a373; font-weight: 900; letter-spacing: -2px;
-        }
-        .sub-title { font-size: 1.1rem; color: #a5a093; margin: 15px 0; font-weight: 700; line-height: 1.6; }
-        .highlight { color: #dc2743; background: #fff0f0; padding: 2px 5px; border-radius: 5px; }
-
-        #price-toggle-btn { 
-            background: #faedcd; color: #8c8679; border: 1.5px solid #e9dcb9; 
-            padding: 12px 25px; border-radius: 50px; 
-            cursor: pointer; font-weight: bold; margin-top: 10px; 
-            font-size: 0.9rem; box-shadow: 0 4px 0px #e9dcb9;
-        }
-        
-        .price-container { display: none; justify-content: center; gap: 10px; margin: 20px 0; flex-wrap: wrap; }
-        .price-card { background: #fff; padding: 15px; border-radius: 20px; border: 2px solid #f0ede5; flex: 1; min-width: 90px; font-size: 0.9rem; }
-
-        /* [핵심] 격자 크기 확대: repeat(8, 1fr)로 칸 수를 줄여 개별 칸을 크게 만듦 */
-        #grid-container { 
-            display: grid; 
-            grid-template-columns: repeat(8, 1fr); /* 10칸에서 8칸으로 줄여서 한 칸을 더 크게 */
-            gap: 6px; 
-            background-color: #f0ede5; 
-            border: 8px solid #fff; 
-            border-radius: 35px; width: 98%; max-width: 600px; /* 가로폭도 살짝 넓힘 */
-            margin: 0 auto; overflow: hidden; padding: 10px; 
-            box-shadow: 0 20px 45px rgba(0,0,0,0.08);
-        }
-        
-        .cell { 
-            background-color: #fff; cursor: pointer; 
-            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-            aspect-ratio: 1 / 1; border-radius: 12px; 
-        }
-        
-        /* 선택 시 노란색 색칠 기능 유지 */
-        .cell.selected { 
-            background-color: #fff4a3 !important; 
-            border: 5px solid #d4a373; 
-            z-index: 10; transform: scale(1.15) rotate(-2deg);
-            box-shadow: 0 10px 25px rgba(212, 163, 115, 0.5);
-        }
-        
+        /* [스타일] 깔끔하고 얇은 모서리, 10x15 격자판 */
+        body { font-family: 'Apple SD Gothic Neo', sans-serif; text-align: center; background-color: #fdfaf4; margin: 0; padding: 15px; }
+        .header-box { background: #ffffff; padding: 30px 20px; border-radius: 30px; margin-bottom: 20px; border: 1.5px solid #f0ede5; box-shadow: 0 10px 25px rgba(212,163,115,0.08); }
+        .event-badge { display: inline-block; background: #dc2743; color: #fff; padding: 4px 12px; border-radius: 8px; font-weight: 800; font-size: 0.9rem; margin-bottom: 10px; animation: blink 1s infinite; }
+        @keyframes blink { 50% { opacity: 0.6; } }
+        h1 { font-size: 2.2rem; margin: 0; color: #d4a373; font-weight: 900; }
+        .sub-title { font-size: 1.1rem; color: #5a564e; margin: 10px 0; font-weight: 800; }
+        #grid-container { display: grid; grid-template-columns: repeat(10, 1fr); gap: 2px; background-color: #e9e5d9; border: 4px solid #fff; border-radius: 15px; width: 100%; max-width: 500px; margin: 0 auto; padding: 3px; }
+        .cell { background-color: #fff; aspect-ratio: 1 / 1; border-radius: 2px; transition: transform 0.2s; }
         .cell.occupied { background-size: cover; background-position: center; }
-
-        #modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(8px); }
-        #modal img { max-width: 90%; max-height: 75%; border-radius: 30px; border: 6px solid #fff; }
-        #modal-timer { margin-top: 25px; color: #fff; font-size: 1.3rem; font-weight: bold; background: #dc2743; padding: 15px 35px; border-radius: 50px; }
-
-        .info-panel { 
-            margin-top: 40px; padding: 30px; 
-            background: #ffffff; border-radius: 45px; 
-            width: 90%; max-width: 450px; display: inline-block; border: 2px solid #f0ede5; 
-        }
-        
-        .dm-btn { 
-            display: block; width: 100%; padding: 25px; font-size: 1.4rem; font-weight: 900; 
-            background: linear-gradient(135deg, #f09433 0%, #dc2743 50%, #bc1888 100%); 
-            color: white; border: none; border-radius: 35px; text-decoration: none; 
-            box-shadow: 0 15px 30px rgba(220, 39, 67, 0.3);
-        }
-        .dm-btn:active { transform: scale(0.95); }
-
-        #admin-panel { display: none; margin-top: 20px; padding: 20px; background: white; border-radius: 25px; border: 2px dashed #d4a373; }
-        #secret-trigger { width: 80px; height: 80px; position: fixed; bottom: 0; right: 0; z-index: 999; }
+        .dm-btn { display: block; width: 90%; max-width: 400px; margin: 30px auto; padding: 20px; font-size: 1.3rem; font-weight: 900; background: linear-gradient(45deg, #f09433, #dc2743, #cc2366); color: white; border-radius: 30px; text-decoration: none; box-shadow: 0 10px 20px rgba(220,39,67,0.2); }
     </style>
 </head>
 <body>
-
     <div class="header-box">
-        <h1>돗자리 ⛺️</h1>
-        <!-- 멘트 수정: 참신한 느낌으로 변경 -->
-        <div class="sub-title">
-            "빈 땅에 알박기 금지!"<br>
-            지금 이 자리는 <span class="highlight">당신만</span> 쓸 수 있어요.
-        </div>
-        <button id="price-toggle-btn" onclick="togglePrice()">💰 자릿세 얼마예요?</button>
-        <div id="price-list" class="price-container">
-            <div class="price-card">잠깐(1일)<br><b>1,000</b></div>
-            <div class="price-card">길게(7일)<br><b>5,000</b></div>
-            <div class="price-card" style="background:#faedcd;">내꺼(한달)<br><b>2.0</b></div>
-        </div>
+        <div id="view-badge" class="event-badge">LOADING...</div>
+        <h1 id="view-title">돗자리</h1>
+        <div id="view-sub" class="sub-title">데이터를 불러오는 중입니다.</div>
     </div>
-
     <div id="grid-container"></div>
-
-    <div class="info-panel">
-        <div id="selected-info" style="font-weight:800; color:#8c8679; margin-bottom:20px; font-size:1.2rem;">👀 탐나는 빈자리를 콕 찍어보세요!</div>
-        <a href="https://www.instagram.com/my.dotzari/" target="_blank" class="dm-btn">나도 여기서 장사하기</a>
-    </div>
-
-    <div id="modal" onclick="closeModal()">
-        <img id="modal-img" src="">
-        <div id="modal-timer"></div>
-    </div>
-
-    <div id="secret-trigger" onclick="openAdmin()"></div>
-    <div id="admin-panel">
-        <input type="number" id="cell-num" placeholder="No.">
-        <input type="text" id="img-url" placeholder="IMG URL">
-        <input type="number" id="ad-hours" placeholder="TIME(h)">
-        <button onclick="addAd()" style="background:#d4a373; color:white; border:none; padding:10px 25px; border-radius:15px; font-weight:bold;">등록</button>
-    </div>
+    <a href="https://www.instagram.com/my.dotzari/" target="_blank" class="dm-btn">이벤트 참여하기 (DM)</a>
 
     <script>
-        const gridContainer = document.getElementById('grid-container');
-        // 데이터 유지 기능 (그대로)
-        let adData = JSON.parse(localStorage.getItem('dotzari_data')) || {}; 
-
-        function togglePrice() {
-            const list = document.getElementById('price-list');
-            list.style.display = list.style.display === 'flex' ? 'none' : 'flex';
-        }
-
-        // 전체 칸 수는 120칸으로 조정 (가로 8칸 x 세로 15줄) 하여 광고판의 가독성을 높임
-        function initGrid() {
-            gridContainer.innerHTML = '';
-            for (let i = 1; i <= 120; i++) {
+        const STORAGE_KEY = 'dotzari_data_v1';
+        const TEXT_KEY = 'dotzari_text_v1';
+        function loadContent() {
+            const textData = JSON.parse(localStorage.getItem(TEXT_KEY)) || { badge: "OPEN EVENT 🎁", title: "돗자리 ⛺️", sub: "지금 입점하면 광고 시간 2배!" };
+            document.getElementById('view-badge').innerText = textData.badge;
+            document.getElementById('view-title').innerText = textData.title;
+            document.getElementById('view-sub').innerText = textData.sub;
+            const adData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+            const grid = document.getElementById('grid-container');
+            grid.innerHTML = '';
+            for (let i = 1; i <= 150; i++) {
                 const cell = document.createElement('div');
-                cell.id = `cell-${i}`;
                 cell.className = 'cell';
-                updateCell(i, cell);
-                
-                cell.addEventListener('click', () => {
-                    document.querySelectorAll('.cell').forEach(c => c.classList.remove('selected'));
-                    cell.classList.add('selected');
-                    
-                    const data = adData[i];
-                    if (data && data.expiry > Date.now()) {
-                        openModal(i);
-                    } else {
-                        document.getElementById('selected-info').innerText = `⛺️ ${i}번 명당은 지금 비어있어요!`;
-                    }
-                });
-                gridContainer.appendChild(cell);
+                if (adData[i] && adData[i].expiry > Date.now()) {
+                    cell.style.backgroundImage = `url('${adData[i].url}')`;
+                    cell.classList.add('occupied');
+                }
+                grid.appendChild(cell);
             }
         }
-
-        function openModal(id) {
-            const data = adData[id];
-            const remain = data.expiry - Date.now();
-            const h = Math.floor(remain / 3600000);
-            const m = Math.floor((remain % 3600000) / 60000);
-            document.getElementById('modal-img').src = data.url;
-            document.getElementById('modal-timer').innerText = `⏰ 마감까지 ${h}시간 ${m}분 남음`;
-            document.getElementById('modal').style.display = 'flex';
-        }
-
-        function closeModal() { document.getElementById('modal').style.display = 'none'; }
-
-        function updateCell(i, el) {
-            const data = adData[i];
-            if (data && data.expiry > Date.now()) {
-                el.classList.add('occupied');
-                el.style.backgroundImage = `url('${data.url}')`;
-            } else {
-                el.classList.remove('occupied');
-                el.style.backgroundImage = '';
-            }
-        }
-
-        function openAdmin() { if(prompt("사장님:") === "1234") document.getElementById('admin-panel').style.display='block'; }
-        
-        function addAd() {
-            const n = document.getElementById('cell-num').value;
-            const u = document.getElementById('img-url').value;
-            const h = document.getElementById('ad-hours').value;
-            if(!n || !u || !h) return;
-            adData[n] = { url: u, expiry: Date.now() + (h * 3600000) };
-            localStorage.setItem('dotzari_data', JSON.stringify(adData));
-            initGrid();
-            alert("돗자리 분양 완료!");
-        }
-        initGrid();
+        loadContent();
+        window.addEventListener('storage', loadContent);
     </script>
 </body>
 </html>
