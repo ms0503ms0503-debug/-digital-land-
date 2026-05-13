@@ -5,122 +5,117 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>돗자리 (DOT-ZARI)</title>
     <style>
-        /* 인스타 바이럴 특유의 깨끗하지만 굵직한 느낌 */
+        /* [배경] 다시 돌아온 따뜻하고 포근한 베이지 */
         body { 
-            font-family: 'Pretendard', -apple-system, sans-serif; 
+            font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; 
             text-align: center; 
-            background: #fdfdfd; /* 거의 화이트에 가까운 깨끗한 배경 */
-            margin: 0; padding: 20px; color: #1a1a1a; 
+            background-color: #fdfaf4; /* 훨씬 부드러운 밀크티 색상 */
+            margin: 0; padding: 20px; color: #5a564e; 
         }
         
-        /* 상단 배너: 심플하지만 굵은 테두리와 폰트로 임팩트 */
+        /* [상단 배너] 귀여운 둥근 사각형 + 은은한 그림자 */
         .header-box { 
-            background: #fff; 
-            padding: 40px 20px; border-radius: 0 0 40px 40px; 
-            margin: -20px -20px 30px -20px;
-            border-bottom: 4px solid #1a1a1a; /* 굵은 하단 선으로 '조잡한 듯 힙한' 느낌 */
+            background: #ffffff; 
+            padding: 30px 20px; border-radius: 30px; 
+            box-shadow: 0 8px 20px rgba(0,0,0,0.04); 
+            margin-bottom: 25px; border: 1.5px solid #f0ede5; 
         }
         
         h1 { 
-            font-size: 2.4rem; margin: 0; 
-            font-weight: 900; letter-spacing: -2px;
-            text-transform: uppercase;
+            font-size: 1.8rem; margin: 0; 
+            color: #d4a373; /* 따뜻한 브라운 */
+            font-weight: 800; letter-spacing: -1px; 
         }
-        
-        .tag {
-            display: inline-block; background: #1a1a1a; color: #fff;
-            padding: 4px 12px; font-size: 0.8rem; border-radius: 5px;
-            margin-top: 10px; font-weight: 700;
-        }
+        .sub-title { font-size: 0.9rem; color: #a5a093; margin: 10px 0; font-weight: 600; }
 
-        .sub-title { font-size: 1rem; color: #1a1a1a; margin: 15px 0; font-weight: 400; line-height: 1.4; }
-
-        /* 이용 안내: 투박한 느낌의 버튼 */
+        /* [버튼] 귀여운 파스텔톤 안내 버튼 */
         #price-toggle-btn { 
-            background: #fff; color: #1a1a1a; border: 2px solid #1a1a1a; 
-            padding: 10px 20px; border-radius: 0; /* 각진 버튼 */
-            cursor: pointer; font-weight: 800; margin-bottom: 10px; 
-            font-size: 0.85rem; box-shadow: 4px 4px 0 #1a1a1a; /* 그림자 효과 */
+            background: #faedcd; color: #8c8679; border: none; 
+            padding: 8px 18px; border-radius: 50px; 
+            cursor: pointer; font-weight: bold; margin-bottom: 10px; 
+            font-size: 0.8rem; transition: 0.2s;
         }
-        #price-toggle-btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 #1a1a1a; }
         
         .price-container { display: none; justify-content: center; gap: 10px; margin: 15px 0; flex-wrap: wrap; }
-        .price-card { background: #fff; padding: 15px; border: 2px solid #1a1a1a; flex: 1; min-width: 90px; font-weight: 700; }
+        .price-card { background: #fff; padding: 12px; border-radius: 15px; border: 1px solid #f0ede5; flex: 1; min-width: 80px; font-size: 0.8rem; }
+        .price-card b { color: #d4a373; }
 
-        /* 격자판: 꽉 차는 느낌 */
+        /* [격자판] 정갈하고 깨끗한 돗자리판 */
         #grid-container { 
-            display: grid; grid-template-columns: repeat(10, 1fr); gap: 1px; 
-            background-color: #1a1a1a; 
-            border: 3px solid #1a1a1a; 
-            width: 100%; max-width: 500px; 
-            margin: 0 auto; overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            display: grid; grid-template-columns: repeat(10, 1fr); gap: 3px; 
+            background-color: #e9e5d9; 
+            border: 2px solid #fff; 
+            border-radius: 20px; width: 95%; max-width: 500px; 
+            margin: 0 auto; overflow: hidden; padding: 5px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
         }
-        .cell { background-color: #fff; cursor: pointer; transition: 0.1s; aspect-ratio: 1 / 1; }
+        .cell { background-color: #fff; cursor: pointer; transition: 0.2s; position: relative; aspect-ratio: 1 / 1; border-radius: 4px; }
         
-        /* [사장님 요청] 선택 시 노란색으로 색칠되는 효과 - 강력하게! */
+        /* [핵심 기능] 선택 시 부드럽게 노란색으로 색칠되는 효과 */
         .cell.selected { 
-            background-color: #faff00 !important; /* 형광 노랑 */
-            outline: 3px inset #1a1a1a;
-            z-index: 10;
+            background-color: #fef4a9 !important; /* 포근한 레몬옐로우 */
+            border: 3.5px solid #d4a373; 
+            z-index: 5; transform: scale(1.1); 
+            box-shadow: 0 5px 15px rgba(212, 163, 115, 0.3);
         }
         
         .cell.occupied { background-size: cover; background-position: center; }
 
-        /* 모달: 인스타 느낌의 다크 배경 */
-        #modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: #fff; flex-direction: column; justify-content: center; align-items: center; }
-        #modal img { max-width: 90%; max-height: 70%; border: 4px solid #1a1a1a; }
-        #modal-timer { margin-top: 20px; font-size: 1.5rem; font-weight: 900; color: #1a1a1a; text-decoration: underline; }
-        .close-modal { position: absolute; top: 20px; right: 20px; font-size: 2rem; font-weight: 900; cursor: pointer; }
+        /* [모달] 깔끔한 확대 창 */
+        #modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); flex-direction: column; justify-content: center; align-items: center; }
+        #modal img { max-width: 85%; max-height: 70%; border-radius: 20px; border: 3px solid #fff; }
+        #modal-timer { margin-top: 15px; color: #fff; font-size: 1.1rem; font-weight: bold; background: #d4a373; padding: 8px 20px; border-radius: 50px; }
 
-        /* 하단 버튼: 인스타 그라데이션 포인트 */
-        .info-panel { margin-top: 40px; padding: 20px; width: 100%; box-sizing: border-box; }
+        /* [연락하기] 사장님이 강조하신 인스타 색감 버튼 */
+        .info-panel { 
+            margin-top: 30px; padding: 20px; 
+            background: #ffffff; border-radius: 35px; 
+            width: 90%; max-width: 400px; display: inline-block; border: 1px solid #f0ede5; 
+        }
         
         .dm-btn { 
-            display: block; width: 100%; max-width: 400px; margin: 0 auto;
-            padding: 22px; font-size: 1.3rem; font-weight: 900; 
+            display: block; width: 100%; padding: 20px; font-size: 1.2rem; font-weight: bold; 
             background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366); 
-            color: white; border: none; border-radius: 50px; text-decoration: none; 
-            box-sizing: border-box; transition: 0.3s;
+            color: white; border: none; border-radius: 25px; text-decoration: none; box-sizing: border-box; 
+            transition: 0.3s; box-shadow: 0 8px 20px rgba(220, 39, 67, 0.2);
         }
+        .dm-btn:active { transform: scale(0.97); }
 
-        #admin-panel { display: none; margin-top: 20px; padding: 20px; background: #eee; border: 2px solid #1a1a1a; }
-        #secret-trigger { width: 50px; height: 50px; position: fixed; bottom: 0; right: 0; z-index: 999; }
+        #admin-panel { display: none; margin-top: 20px; padding: 20px; background: white; border-radius: 20px; border: 1px dashed #d4a373; }
+        #secret-trigger { width: 60px; height: 60px; position: fixed; bottom: 0; right: 0; z-index: 999; }
     </style>
 </head>
 <body>
 
     <div class="header-box">
-        <div class="tag">NOW OPEN</div>
-        <h1>DOT ZARI</h1>
-        <div class="sub-title"><b>가장 힙한 성수동 돗자리판.</b><br>지금 당신의 자리를 찜하세요.</div>
-        <button id="price-toggle-btn" onclick="togglePrice()">HOW MUCH?</button>
+        <h1>돗자리 ⛺️</h1>
+        <div class="sub-title">포근한 오후, 당신의 자리를 마련했어요.</div>
+        <button id="price-toggle-btn" onclick="togglePrice()">💳 이용 안내</button>
         <div id="price-list" class="price-container">
-            <div class="price-card">1 DAY<br>1,000</div>
-            <div class="price-card">7 DAYS<br>5,000</div>
-            <div class="price-card" style="background:#1a1a1a; color:#fff;">30 DAYS<br>20,000</div>
+            <div class="price-card">1일<br><b>1,000원</b></div>
+            <div class="price-card">1주일<br><b>5,000원</b></div>
+            <div class="price-card" style="border:1.5px solid #d4a373;">1개월<br><b>2.0</b></div>
         </div>
     </div>
 
     <div id="grid-container"></div>
 
     <div class="info-panel">
-        <div id="selected-info" style="font-weight:900; font-size:1.2rem; margin-bottom:20px; text-transform: uppercase;">SELECT YOUR SPOT</div>
-        <a href="https://www.instagram.com/my.dotzari/" target="_blank" class="dm-btn">GET IT NOW (DM)</a>
+        <div id="selected-info" style="font-weight:700; color:#8c8679; margin-bottom:15px;">비어있는 자리를 선택해 보세요!</div>
+        <a href="https://www.instagram.com/my.dotzari/" target="_blank" class="dm-btn">여기에 돗자리 펴기 (DM)</a>
     </div>
 
-    <div id="modal">
-        <div class="close-modal" onclick="closeModal()">✕</div>
+    <div id="modal" onclick="closeModal()">
         <img id="modal-img" src="">
         <div id="modal-timer"></div>
     </div>
 
     <div id="secret-trigger" onclick="openAdmin()"></div>
     <div id="admin-panel">
-        <input type="number" id="cell-num" placeholder="No.">
-        <input type="text" id="img-url" placeholder="URL">
-        <input type="number" id="ad-hours" placeholder="HOUR">
-        <button onclick="addAd()">OK</button>
+        <input type="number" id="cell-num" placeholder="번호">
+        <input type="text" id="img-url" placeholder="이미지 주소">
+        <input type="number" id="ad-hours" placeholder="시간">
+        <button onclick="addAd()" style="background:#d4a373; color:white; border:none; padding:8px 15px; border-radius:10px;">등록</button>
     </div>
 
     <script>
@@ -141,7 +136,7 @@
                 updateCell(i, cell);
                 
                 cell.addEventListener('click', () => {
-                    // [색칠 기능] 모든 칸 초기화 후 선택한 칸만 노란색으로!
+                    // [색칠 기능] 선택한 칸만 부드러운 노란색으로 강조!
                     document.querySelectorAll('.cell').forEach(c => c.classList.remove('selected'));
                     cell.classList.add('selected');
                     
@@ -149,7 +144,7 @@
                     if (data && data.expiry > Date.now()) {
                         openModal(i);
                     } else {
-                        document.getElementById('selected-info').innerText = `SPOT NO.${i} SELECTED`;
+                        document.getElementById('selected-info').innerText = `✨ ${i}번 명당을 선택했어요!`;
                     }
                 });
                 gridContainer.appendChild(cell);
@@ -162,7 +157,7 @@
             const h = Math.floor(remain / 3600000);
             const m = Math.floor((remain % 3600000) / 60000);
             document.getElementById('modal-img').src = data.url;
-            document.getElementById('modal-timer').innerText = `LEFT: ${h}H ${m}M`;
+            document.getElementById('modal-timer').innerText = `⏰ 남은 시간: ${h}시간 ${m}분`;
             document.getElementById('modal').style.display = 'flex';
         }
 
@@ -179,7 +174,7 @@
             }
         }
 
-        function openAdmin() { if(prompt("PW:") === "1234") document.getElementById('admin-panel').style.display='block'; }
+        function openAdmin() { if(prompt("사장님 전용 암호:") === "1234") document.getElementById('admin-panel').style.display='block'; }
         
         function addAd() {
             const n = document.getElementById('cell-num').value;
@@ -189,6 +184,7 @@
             adData[n] = { url: u, expiry: Date.now() + (h * 3600000) };
             localStorage.setItem('dotzari_data', JSON.stringify(adData));
             initGrid();
+            alert("돗자리 등록 완료! ⛺️");
         }
         initGrid();
     </script>
