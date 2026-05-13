@@ -3,22 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>디지털 땅 10,000 분양</title>
+    <title>Digital Land - 시세 급상승 중!</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <header>
         <h1>디지털 땅 10,000 프로젝트</h1>
-        <p>인스타그램 홍보용 픽셀 광고판 (프로토타입)</p>
+        <div class="status-bar">
+            <span id="price-tag">현재 시세: 1,000원</span> | 
+            <span id="sold-count">분양 완료: 0 / 10,000</span>
+        </div>
+        <p id="next-price-info">다음 가격 인상까지 10칸 남았습니다!</p>
     </header>
 
     <main>
         <div id="grid-container"></div>
         
         <div class="info-panel">
-            <h2>현재 시세: 1칸당 1,000원</h2>
-            <p>원하는 칸을 클릭해 보세요.</p>
-            <button onclick="alert('정식 서비스 준비 중입니다! 오픈 알림을 신청해 주세요.')">지금 내 땅 선점하기</button>
+            <h3 id="selected-info">칸을 선택해 주세요</h3>
+            <button class="buy-btn" onclick="openEnroll()">지금 이 가격에 선점하기</button>
         </div>
     </main>
 
