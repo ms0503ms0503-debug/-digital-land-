@@ -18,11 +18,10 @@
         #grid-container { display: grid; grid-template-columns: repeat(10, 1fr); gap: 2px; background-color: #e9e5d9; border: 4px solid #fff; border-radius: 15px; width: 100%; max-width: 500px; margin: 0 auto; padding: 3px; }
         .cell { background-color: #fff; aspect-ratio: 1 / 1; border-radius: 2px; cursor: pointer; transition: 0.2s; }
         
-        /* 노란색 선택 효과 */
-        .cell.selected { background-color: #FFEB3B !important; border: 1.5px solid #FBC02D; }
+        /* 노란색 단일 선택 효과 */
+        .cell.selected { background-color: #FFEB3B !important; border: 1.5px solid #FBC02D; outline: none; }
         .cell.occupied { background-size: cover; background-position: center; }
 
-        /* 하단 안내 문구 스타일 */
         .selection-info { margin-top: 25px; font-size: 1.1rem; font-weight: 800; color: #d4a373; min-height: 1.5rem; }
         .dm-btn { display: block; width: 90%; max-width: 400px; margin: 10px auto 30px auto; padding: 20px; font-size: 1.3rem; font-weight: 900; background: linear-gradient(45deg, #f09433, #dc2743, #cc2366); color: white; border-radius: 30px; text-decoration: none; box-shadow: 0 10px 20px rgba(220,39,67,0.2); }
     </style>
@@ -41,9 +40,7 @@
     </div>
 
     <div id="grid-container"></div>
-
     <div id="selection-text" class="selection-info">원하는 자리를 클릭해보세요!</div>
-    
     <a href="https://www.instagram.com/my.dotzari/" target="_blank" class="dm-btn">이벤트 참여하기 (DM)</a>
 
     <script>
@@ -78,16 +75,16 @@
                 }
                 
                 cell.onclick = function() {
-                    // 모든 칸에서 선택 효과 제거 (한 번에 하나만 선택하게 하려면 이 코드 유지)
-                    const cells = document.querySelectorAll('.cell');
-                    cells.forEach(c => c.classList.remove('selected'));
+                    // 1. 기존에 선택된 노란색 칸들을 모두 찾아서 지움 (단일 선택 기능)
+                    const prevSelected = document.querySelectorAll('.cell.selected');
+                    prevSelected.forEach(c => c.classList.remove('selected'));
                     
-                    // 현재 클릭한 칸 선택
+                    // 2. 현재 누른 칸에만 노란색 입히기
                     this.classList.add('selected');
                     
-                    // DM 버튼 위 문구 업데이트
+                    // 3. 안내 문구 변경 (알림창 없이 바로 반영)
                     selectionText.innerText = "선택하신 자리는 " + i + "번입니다!";
-                    selectionText.style.color = "#dc2743"; // 강조색
+                    selectionText.style.color = "#dc2743"; 
                 };
                 grid.appendChild(cell);
             }
