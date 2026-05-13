@@ -20,7 +20,8 @@
         .cell.selected { background-color: #FFEB3B !important; border: 1.5px solid #FBC02D; }
         .cell.occupied { background-size: cover; background-position: center; }
         .selection-info { margin-top: 25px; font-size: 1.1rem; font-weight: 800; color: #d4a373; min-height: 1.5rem; }
-        .dm-btn { display: block; width: 90%; max-width: 400px; margin: 10px auto 30px auto; padding: 20px; font-size: 1.3rem; font-weight: 900; background: linear-gradient(45deg, #f09433, #dc2743, #cc2366); color: white; border-radius: 30px; text-decoration: none; box-shadow: 0 10px 20px rgba(220,39,67,0.2); }
+        .dm-btn { display: block; width: 90%; max-width: 400px; margin: 10px auto 30px auto; padding: 20px; font-size: 1.3rem; font-weight: 900; background: linear-gradient(45deg, #f09433, #dc2743, #cc2366); color: white; border-radius: 30px; text-decoration: none; box-shadow: 0 10px 20px rgba(220,39,67,0.2); transition: 0.3s; }
+        .dm-btn:active { transform: scale(0.95); }
         #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; justify-content: center; align-items: center; flex-direction: column; color: white; }
         #modal-img { max-width: 90%; max-height: 70%; border-radius: 15px; margin-bottom: 20px; }
         .timer-box { font-size: 1.5rem; font-weight: 900; color: #FFEB3B; background: rgba(0,0,0,0.5); padding: 10px 20px; border-radius: 10px; }
@@ -40,7 +41,10 @@
     </div>
     <div id="grid-container"></div>
     <div id="selection-text" class="selection-info">원하는 자리를 클릭해보세요!</div>
-    <a href="https://www.instagram.com/my.dotzari/" target="_blank" class="dm-btn">이벤트 참여하기 (DM)</a>
+    
+    <!-- 하단 버튼: 서버에서 텍스트와 링크를 불러옵니다[span_2](start_span)[span_2](end_span) -->
+    <a href="#" id="event-link" target="_blank" class="dm-btn">이벤트 참여하기</a>
+
     <div id="modal" onclick="closeModal()">
         <img id="modal-img" src=""><div id="timer" class="timer-box"></div>
     </div>
@@ -70,7 +74,7 @@
 
         db.ref('/').on('value', (snapshot) => {
             const data = snapshot.val() || {};
-            const textData = data.text || { badge:"OPEN", title:"돗자리", sub:"환영합니다", p1:"5천", p2:"3만", p3:"10만" };
+            const textData = data.text || { badge:"OPEN", title:"돗자리", sub:"환영합니다", p1:"5천", p2:"3만", p3:"10만", btnText:"이벤트 참여하기", btnLink:"#" };
             const adData = data.ads || {};
 
             document.getElementById('view-badge').innerText = textData.badge;
@@ -79,6 +83,11 @@
             document.getElementById('p1').innerText = textData.p1;
             document.getElementById('p2').innerText = textData.p2;
             document.getElementById('p3').innerText = textData.p3;
+            
+            // 버튼 텍스트와 링크 업데이트[span_3](start_span)[span_3](end_span)
+            const eventBtn = document.getElementById('event-link');
+            eventBtn.innerText = textData.btnText || "이벤트 참여하기";
+            eventBtn.href = textData.btnLink || "#";
 
             const grid = document.getElementById('grid-container');
             grid.innerHTML = '';
@@ -99,10 +108,7 @@
                         clearInterval(timerInterval);
                         timerInterval = setInterval(() => {
                             const rem = ad.expiry - Date.now();
-                            if (rem <= 0) {
-                                document.getElementById('timer').innerText = "분양 종료";
-                                return;
-                            }
+                            if (rem <= 0) { document.getElementById('timer').innerText = "분양 종료"; return; }
                             const days = Math.floor(rem / (1000 * 60 * 60 * 24));
                             const hrs = Math.floor((rem % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                             const mins = Math.floor((rem % (1000 * 60 * 60)) / (1000 * 60));
