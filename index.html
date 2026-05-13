@@ -3,77 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Digital Land - 150 Project</title>
+    <title>Digital Land 150</title>
     <style>
-        /* 사장님 픽: 인스타 감성 UI */
         body { font-family: 'Apple SD Gothic Neo', sans-serif; text-align: center; background-color: #f0f2f5; margin: 0; padding: 20px; color: #1c1e21; }
         .header-box { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 20px; }
         h1 { font-size: 1.5rem; margin-bottom: 10px; color: #1d1d1f; }
         
-        /* [NEW] 가격표 섹션 */
-        .price-container { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        /* [NEW] 숨겨진 가격표 스타일 */
+        #price-toggle-btn { background: #eee; border: none; padding: 10px 20px; border-radius: 50px; cursor: pointer; font-weight: bold; margin-bottom: 10px; transition: 0.3s; }
+        #price-toggle-btn:hover { background: #ddd; }
+        .price-container { 
+            display: none; /* 기본은 숨김 */
+            justify-content: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; 
+            animation: fadeIn 0.4s;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
         .price-card { background: white; padding: 12px 15px; border-radius: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #eee; flex: 1; min-width: 100px; max-width: 120px; }
-        .price-card .period { font-size: 0.75rem; color: #666; display: block; }
-        .price-card .amount { font-size: 1rem; font-weight: 900; color: #1d1d1f; }
-        .price-card.best { border: 2px solid #ff3b30; position: relative; }
-        .price-card.best::after { content: "BEST"; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: #ff3b30; color: white; font-size: 0.6rem; padding: 2px 6px; border-radius: 10px; }
+        .price-card .amount { font-size: 1rem; font-weight: 900; }
 
-        /* 150칸 격자판 */
-        #grid-container { 
-            display: grid; 
-            grid-template-columns: repeat(10, 1fr); 
-            gap: 2px; 
-            background-color: #ddd; 
-            border: 2px solid #1d1d1f; 
-            width: 95%; 
-            max-width: 500px; 
-            margin: 0 auto; 
-        }
-        .cell { background-color: white; border-radius: 1px; cursor: pointer; transition: 0.2s; position: relative; overflow: hidden; aspect-ratio: 1 / 1; }
-        .cell:hover { background-color: #ffeb3b; transform: scale(1.1); z-index: 10; }
-        .cell.occupied { background-size: cover; background-position: center; border: none; }
-        
-        .timer-label { 
-            position: absolute; bottom: 0; left: 0; width: 100%; 
-            background: rgba(0,0,0,0.6); color: #fff; 
-            font-size: 0.5rem; padding: 1px 0; display: none; 
-        }
+        /* 격자판 */
+        #grid-container { display: grid; grid-template-columns: repeat(10, 1fr); gap: 2px; background-color: #ddd; border: 2px solid #1d1d1f; width: 95%; max-width: 500px; margin: 0 auto; }
+        .cell { background-color: white; cursor: pointer; transition: 0.2s; position: relative; overflow: hidden; aspect-ratio: 1 / 1; }
+        .cell.occupied { background-size: cover; background-position: center; }
+        .timer-label { position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(0,0,0,0.6); color: #fff; font-size: 0.5rem; padding: 1px 0; display: none; }
         .occupied .timer-label { display: block; }
 
-        /* 하단 안내창 */
-        .info-panel { margin-top: 25px; padding: 25px; background: white; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 90%; max-width: 400px; display: inline-block; }
-        
-        .dm-btn { 
-            display: block; width: 100%; padding: 18px; font-size: 1.1rem; font-weight: bold; 
-            background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); 
-            color: white; border: none; border-radius: 15px; text-decoration: none; cursor: pointer;
-            box-shadow: 0 4px 15px rgba(220, 39, 67, 0.4); box-sizing: border-box;
-        }
+        /* [NEW] 이미지 확대 모달(팝업) 스타일 */
+        #modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); justify-content: center; align-items: center; }
+        #modal img { max-width: 90%; max-height: 80%; border-radius: 10px; border: 3px solid white; }
+        #modal-close { position: absolute; top: 20px; right: 20px; color: white; font-size: 30px; cursor: pointer; font-weight: bold; }
 
-        /* 관리자 패널 */
+        .info-panel { margin-top: 25px; padding: 25px; background: white; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 90%; max-width: 400px; display: inline-block; }
+        .dm-btn { display: block; width: 100%; padding: 18px; font-size: 1.1rem; font-weight: bold; background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); color: white; border: none; border-radius: 15px; text-decoration: none; box-sizing: border-box; }
+
         #admin-panel { display: none; margin-top: 20px; padding: 20px; background: white; border-radius: 20px; border: 2px dashed #ccc; }
-        #admin-panel input { width: 85%; padding: 10px; margin: 5px; border: 1px solid #ddd; border-radius: 10px; }
         #secret-trigger { width: 40px; height: 40px; position: fixed; bottom: 0; right: 0; z-index: 999; }
     </style>
 </head>
 <body>
 
     <div class="header-box">
-        <h1>디지털 부동산 150 프로젝트</h1>
-        <!-- 가격표 버튼 섹션 -->
-        <div class="price-container">
-            <div class="price-card">
-                <span class="period">1일 권</span>
-                <span class="amount">1,000원</span>
-            </div>
-            <div class="price-card">
-                <span class="period">1주일 권</span>
-                <span class="amount">5,000원</span>
-            </div>
-            <div class="price-card best">
-                <span class="period">1개월 권</span>
-                <span class="amount">20,000원</span>
-            </div>
+        <h1>디지털 부동산 150</h1>
+        <button id="price-toggle-btn" onclick="togglePrice()">💰 분양 가격표 보기</button>
+        <div id="price-list" class="price-container">
+            <div class="price-card"><span style="font-size:0.7rem; color:#666;">1일</span><br><span class="amount">1,000원</span></div>
+            <div class="price-card"><span style="font-size:0.7rem; color:#666;">1주일</span><br><span class="amount">5,000원</span></div>
+            <div class="price-card" style="border:2px solid #ff3b30;"><span style="font-size:0.7rem; color:#ff3b30; font-weight:bold;">1개월(BEST)</span><br><span class="amount">20,000원</span></div>
         </div>
     </div>
 
@@ -81,25 +56,39 @@
 
     <div class="info-panel">
         <div id="selected-info" style="font-weight:bold; color:#ff3b30; margin-bottom:15px;">비어있는 칸을 선택하세요</div>
-        <a href="https://www.instagram.com/사장님_아이디/" target="_blank" class="dm-btn">
-            인스타 DM으로 광고 신청
-        </a>
-        <p style="font-size:0.85rem; color:#666; margin-top:15px;">원하시는 플랜을 말씀해 주시면<br>즉시 구좌 분양 및 타이머가 시작됩니다.</p>
+        <a href="https://www.instagram.com/사장님_아이디/" target="_blank" class="dm-btn">인스타 DM으로 신청하기</a>
+    </div>
+
+    <!-- 이미지 확대 모달 -->
+    <div id="modal" onclick="closeModal()">
+        <span id="modal-close">&times;</span>
+        <img id="modal-img" src="" alt="확대보기">
     </div>
 
     <div id="admin-panel">
-        <h3>ADMIN: 광고 등록</h3>
-        <input type="number" id="cell-num" placeholder="칸 번호 (1-150)">
+        <h3>ADMIN</h3>
+        <input type="number" id="cell-num" placeholder="칸 번호">
         <input type="text" id="img-url" placeholder="이미지 URL">
-        <input type="number" id="ad-hours" placeholder="대여 시간 (직접 입력)">
-        <button onclick="addAd()" style="padding:10px 20px; background:#1d1d1f; color:white; border-radius:10px; cursor:pointer; border:none; font-weight:bold;">즉시 게시</button>
+        <input type="number" id="ad-hours" placeholder="시간(h)">
+        <button onclick="addAd()">게시</button>
     </div>
-
     <div id="secret-trigger" onclick="openAdmin()"></div>
 
     <script>
         const gridContainer = document.getElementById('grid-container');
         let adData = {}; 
+
+        function togglePrice() {
+            const list = document.getElementById('price-list');
+            const btn = document.getElementById('price-toggle-btn');
+            if(list.style.display === 'flex') {
+                list.style.display = 'none';
+                btn.innerText = '💰 분양 가격표 보기';
+            } else {
+                list.style.display = 'flex';
+                btn.innerText = '❌ 가격표 닫기';
+            }
+        }
 
         function initGrid() {
             gridContainer.innerHTML = '';
@@ -111,12 +100,26 @@
                 label.className = 'timer-label';
                 cell.appendChild(label);
                 updateCell(i, cell);
+                
                 cell.addEventListener('click', () => {
-                    document.getElementById('selected-info').innerText = `${i}번 칸 선택됨 (입점 가능)`;
+                    const data = adData[i];
+                    if (data && data.expiry > Date.now()) {
+                        // [확대 기능] 이미 분양된 땅이면 사진 확대
+                        openModal(data.url);
+                    } else {
+                        // 분양 안 된 땅이면 메시지만 표시
+                        document.getElementById('selected-info').innerText = `${i}번 칸 선택됨 (입점 가능)`;
+                    }
                 });
                 gridContainer.appendChild(cell);
             }
         }
+
+        function openModal(url) {
+            document.getElementById('modal-img').src = url;
+            document.getElementById('modal').style.display = 'flex';
+        }
+        function closeModal() { document.getElementById('modal').style.display = 'none'; }
 
         function updateCell(i, el) {
             const data = adData[i];
@@ -140,19 +143,15 @@
             }
         }, 60000);
 
-        function openAdmin() { if(prompt("관리자 암호:") === "1234") document.getElementById('admin-panel').style.display='block'; }
-        
+        function openAdmin() { if(prompt("암호:") === "1234") document.getElementById('admin-panel').style.display='block'; }
         function addAd() {
             const n = document.getElementById('cell-num').value;
             const u = document.getElementById('img-url').value;
             const h = document.getElementById('ad-hours').value;
-            if(!n || !u || !h) return alert("전부 입력해주세요!");
-            // 관리자가 입력한 시간 그대로 적용 (이벤트 2배 제거하여 정가 정책 반영)
             adData[n] = { url: u, expiry: Date.now() + (h * 3600000) };
             initGrid();
             alert("게시 완료!");
         }
-
         initGrid();
     </script>
 </body>
