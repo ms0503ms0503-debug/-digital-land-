@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Digital Board 100</title>
+    <title>Digital Land 100</title>
     <style>
-        /* [처음 UI 그대로] 깔끔한 화이트톤 스타일 */
+        /* [맨 처음 UI 스타일 그대로 복구] */
         body { font-family: sans-serif; text-align: center; background-color: #ffffff; margin: 0; padding: 20px; }
         header { margin-bottom: 20px; }
         .status-bar { background: #333; color: #fff; padding: 10px 20px; border-radius: 50px; display: inline-block; margin-bottom: 10px; font-weight: bold; }
 
-        /* [GRID] 100칸 (가로 10 x 세로 10) */
+        /* 100칸 격자판 (10x10) */
         #grid-container { 
             display: grid; 
             grid-template-columns: repeat(10, 1fr); 
@@ -26,7 +26,7 @@
         .cell:hover { background-color: #ffeb3b; }
         .cell.occupied { background-size: cover; background-position: center; border: none; }
         
-        /* 타이머 라벨 (처음 UI를 해치지 않게 아주 얇게 표시) */
+        /* 타이머 표시 (최대한 심플하게) */
         .timer-label { 
             position: absolute; bottom: 0; left: 0; width: 100%; 
             background: rgba(0,0,0,0.6); color: #fff; 
@@ -35,16 +35,20 @@
         }
         .occupied .timer-label { display: block; }
 
-        /* [INFO] 첫 번째 버전의 깔끔한 안내창 */
+        /* 하단 안내 패널 */
         .info-panel { margin-top: 20px; padding: 20px; background: white; border: 1px solid #ddd; display: inline-block; border-radius: 10px; }
         .dm-btn { 
             display: inline-block; padding: 15px 30px; background-color: #ff4757; 
             color: white; text-decoration: none; border-radius: 5px; font-weight: bold; margin-top: 10px;
         }
 
-        /* 관리자 모드 */
-        #admin-panel { display: none; margin-top: 20px; padding: 15px; border: 1px dashed #333; background: #f9f9f9; }
-        #secret-trigger { width: 40px; height: 40px; position: fixed; bottom: 0; right: 0; }
+        /* 관리자 모드 (사장님 전용 패널) */
+        #admin-panel { display: none; margin-top: 20px; padding: 15px; border: 1px dashed #333; background: #f9f9f9; border-radius: 10px; }
+        #admin-panel input { padding: 8px; margin: 5px; width: 80%; border: 1px solid #ddd; border-radius: 4px; }
+        #admin-panel button { padding: 10px 20px; background: #333; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+
+        /* 우측 하단 비밀 진입점 */
+        #secret-trigger { width: 40px; height: 40px; position: fixed; bottom: 0; right: 0; z-index: 999; }
     </style>
 </head>
 <body>
@@ -52,7 +56,7 @@
     <header>
         <h1>디지털 전광판 100</h1>
         <div class="status-bar">
-            24시간 렌탈 | 오픈 이벤트: 시간 2배 적용!
+            24시간 렌탈 | 정식 오픈 이벤트: 시간 2배 적용!
         </div>
     </header>
 
@@ -60,16 +64,15 @@
 
     <div class="info-panel">
         <h3 id="selected-info">원하는 칸을 선택하세요</h3>
-        <p>하루 1,000원 (이벤트로 48시간 노출)</p>
+        <p>1일(24h) 결제 시 총 48시간 노출 중!</p>
         <a href="https://www.instagram.com/사장님_아이디/" target="_blank" class="dm-btn">인스타 DM으로 신청하기</a>
     </div>
 
-    <!-- 관리자 패널 (비밀번호: 1234) -->
     <div id="admin-panel">
-        <h4>광고 등록 (관리자)</h4>
-        <input type="number" id="cell-num" placeholder="칸 번호">
-        <input type="text" id="img-url" placeholder="이미지 URL">
-        <input type="number" id="ad-hours" placeholder="시간 (예: 24)">
+        <h4>광고 게시 & 수동 시간 설정</h4>
+        <input type="number" id="cell-num" placeholder="칸 번호 (1-100)">
+        <input type="text" id="img-url" placeholder="이미지 주소 (URL)">
+        <input type="number" id="ad-hours" placeholder="신청 시간 (예: 24 입력 시 48시간 적용)">
         <button onclick="addAd()">즉시 게시</button>
     </div>
 
@@ -77,7 +80,7 @@
 
     <script>
         const gridContainer = document.getElementById('grid-container');
-        let adData = {}; // 광고 데이터 저장
+        let adData = {}; // 전체 광고 데이터
 
         function initGrid() {
             gridContainer.innerHTML = '';
@@ -114,6 +117,7 @@
             }
         }
 
+        // 1분마다 전체 갱신
         setInterval(() => {
             for(let i=1; i<=100; i++) {
                 const el = document.getElementById(`cell-${i}`);
@@ -121,15 +125,21 @@
             }
         }, 60000);
 
-        function openAdmin() { if(prompt("암호:") === "1234") document.getElementById('admin-panel').style.display='block'; }
+        function openAdmin() { if(prompt("관리자 암호:") === "1234") document.getElementById('admin-panel').style.display='block'; }
         
         function addAd() {
             const n = document.getElementById('cell-num').value;
             const u = document.getElementById('img-url').value;
             const h = document.getElementById('ad-hours').value;
-            adData[n] = { url: u, expiry: Date.now() + (h * 2 * 3600000) };
+            
+            if(!n || !u || !h) return alert("항목을 전부 입력해주세요!");
+
+            // 사장님이 입력한 시간에 이벤트(2배) 적용
+            const finalExpiry = Date.now() + (h * 2 * 3600000); 
+            
+            adData[n] = { url: u, expiry: finalExpiry };
             initGrid();
-            alert("게시 완료!");
+            alert(`${n}번 칸 게시 완료! (${h*2}시간 뒤 자동 삭제)`);
         }
 
         initGrid();
