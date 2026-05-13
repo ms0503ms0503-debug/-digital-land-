@@ -8,22 +8,34 @@
     <style>
         body { font-family: sans-serif; padding: 20px; background: #f0f0f0; max-width: 500px; margin: 0 auto; }
         .card { background: white; padding: 20px; border-radius: 15px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        label { font-size: 0.8rem; font-weight: bold; color: #888; display: block; margin-top: 10px; }
         input, button { width: 100%; padding: 12px; margin: 5px 0; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; }
         button { background: #d4a373; color: white; border: none; cursor: pointer; font-weight: bold; }
         .red { background: #dc2743; }
+        .status { font-size: 0.8rem; color: #2ecc71; text-align: right; margin-bottom: 10px; }
     </style>
 </head>
 <body>
     <h1>🤫 실전 관리 본부</h1>
+    <div class="status" id="db-status">서버 연결 중...</div>
+
     <div class="card">
         <strong>1. 실시간 문구/가격 수정</strong>
-        <input type="text" id="badge" placeholder="배지"><input type="text" id="title" placeholder="제목"><input type="text" id="sub" placeholder="설명">
-        <input type="text" id="p1" placeholder="가격1"><input type="text" id="p2" placeholder="가격2"><input type="text" id="p3" placeholder="가격3">
+        <label>상단 배지</label><input type="text" id="badge">
+        <label>메인 제목</label><input type="text" id="title">
+        <label>상세 설명</label><input type="text" id="sub">
+        <hr>
+        <label>24시간 가격</label><input type="text" id="p1">
+        <label>1주일 가격</label><input type="text" id="p2">
+        <label>1개월 가격</label><input type="text" id="p3">
         <button onclick="saveText()">서버로 즉시 반영</button>
     </div>
+
     <div class="card">
         <strong>2. 광고 실시간 등록</strong>
-        <input type="number" id="num" placeholder="칸 번호"><input type="text" id="url" placeholder="이미지 주소"><input type="number" id="hrs" placeholder="시간(h)">
+        <label>칸 번호 (1~150)</label><input type="number" id="num">
+        <label>이미지 주소 (URL)</label><input type="text" id="url">
+        <label>노출 시간 (시간 단위)</label><input type="number" id="hrs">
         <button onclick="addAd()" class="red">광고 즉시 분양</button>
     </div>
 
@@ -39,6 +51,20 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
+
+        // [추가된 기능] 페이지 열리자마자 기존 데이터 불러오기
+        db.ref('text').once('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                document.getElementById('badge').value = data.badge || "";
+                document.getElementById('title').value = data.title || "";
+                document.getElementById('sub').value = data.sub || "";
+                document.getElementById('p1').value = data.p1 || "";
+                document.getElementById('p2').value = data.p2 || "";
+                document.getElementById('p3').value = data.p3 || "";
+                document.getElementById('db-status').innerText = "● 서버 데이터 로드 완료";
+            }
+        });
 
         function saveText() {
             db.ref('text').set({
