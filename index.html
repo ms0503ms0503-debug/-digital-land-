@@ -2,90 +2,89 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DIGITAL LAND 10,000</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Land 10,000</title>
     <style>
-        /* 힙한 다크 모드 & 네온 감성 디자인 */
-        :root { --main-bg: #0a0a0a; --card-bg: #1a1a1a; --neon-pink: #ff007a; --neon-blue: #00d4ff; }
-        body { font-family: 'Pretendard', -apple-system, sans-serif; background-color: var(--main-bg); color: white; margin: 0; padding: 20px; overflow-x: hidden; }
+        /* 처음 좋아하셨던 밝고 깔끔한 화이트톤 디자인 */
+        body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; text-align: center; background-color: #f8f9fa; margin: 0; padding: 20px; }
+        header { margin-bottom: 20px; }
+        .status-bar { background: #333; color: #fff; padding: 10px 20px; border-radius: 50px; display: inline-block; margin-bottom: 10px; font-weight: bold; }
         
-        .header-box { margin-bottom: 30px; }
-        h1 { font-size: 1.8rem; letter-spacing: -1px; margin-bottom: 5px; background: linear-gradient(to right, var(--neon-pink), var(--neon-blue)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .status-bar { font-size: 0.8rem; color: #888; text-transform: uppercase; letter-spacing: 1px; }
-
-        /* 격자판 - 힙하게 수정 */
+        /* 땅 격자판 */
         #grid-container { 
             display: grid; 
             grid-template-columns: repeat(20, 1fr); 
             gap: 1px; 
-            background-color: #333; 
-            border: 2px solid #333; 
+            background-color: #ddd; 
+            border: 3px solid #333; 
             width: 100%; 
             max-width: 500px; 
-            margin: 20px auto; 
+            margin: 0 auto; 
+            padding: 1px;
             aspect-ratio: 1 / 1;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
         }
-        .cell { background-color: var(--card-bg); transition: 0.2s; position: relative; }
-        .cell:hover { transform: scale(1.1); z-index: 5; background-color: #444; }
-        .cell.occupied { background-size: cover; background-position: center; border: none; box-shadow: inset 0 0 10px rgba(0,0,0,0.5); }
+        .cell { width: 100%; height: 100%; background-color: white; cursor: pointer; }
+        .cell:hover { background-color: #ffeb3b; }
+        .cell.occupied { background-size: cover; background-position: center; border: none; }
 
-        /* 사장님 전용 관리 섹션 (비밀번호 입력 시 등장) */
-        #admin-panel { display: none; background: #222; padding: 15px; border-radius: 15px; margin-top: 20px; border: 1px solid var(--neon-blue); }
-        input[type="text"], input[type="file"] { background: #333; border: 1px solid #444; color: white; padding: 8px; border-radius: 8px; margin-bottom: 10px; width: 80%; }
-
-        /* 하단 구매 유도 패널 */
-        .info-panel { margin-top: 30px; width: 100%; max-width: 400px; display: inline-block; }
+        /* 하단 안내 패널 */
+        .info-panel { margin-top: 30px; padding: 20px; background: white; display: inline-block; border-radius: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); width: 90%; max-width: 400px; }
         .dm-btn { 
-            display: block; padding: 20px; font-size: 1.1rem; font-weight: 800; 
-            background: white; color: black; border-radius: 18px; text-decoration: none; 
-            transition: 0.3s; box-shadow: 0 10px 20px rgba(255,255,255,0.1);
+            display: block; padding: 15px; font-size: 1.1rem; font-weight: bold; 
+            background: linear-gradient(45deg, #ff4757, #ff6b81); 
+            color: white; border: none; border-radius: 30px; text-decoration: none; cursor: pointer;
+            box-shadow: 0 5px 15px rgba(255, 71, 87, 0.4);
         }
-        .dm-btn:hover { background: var(--neon-pink); color: white; transform: translateY(-3px); }
 
-        /* 사장님 모드 진입용 숨겨진 버튼 (하단 구석 클릭 시 작동) */
-        #secret-trigger { width: 40px; height: 40px; position: fixed; bottom: 0; right: 0; cursor: default; }
+        /* [관리자 기능] 평소에는 안 보임 */
+        #admin-panel { display: none; margin-top: 20px; padding: 15px; border: 1px dashed #333; border-radius: 10px; background: #eee; }
+        #admin-panel input { padding: 8px; margin: 5px; border-radius: 5px; border: 1px solid #ccc; width: 70%; }
+
+        /* 맨 아래 구석 비밀 버튼 */
+        #secret-trigger { width: 50px; height: 50px; position: fixed; bottom: 0; right: 0; }
     </style>
 </head>
 <body>
 
-    <div class="header-box">
-        <h1>DIGITAL LAND 10,000</h1>
+    <header>
+        <h1>디지털 땅 10,000 프로젝트</h1>
         <div class="status-bar">
-            PRICE: 1,000 KRW | <span id="sold-count">0</span> / 10,000 SOLD
+            현재 시세: 1,000원 | 분양 완료: <span id="sold-count">0</span> / 10,000
         </div>
-    </div>
+    </header>
 
-    <div id="grid-container"></div>
+    <main>
+        <div id="grid-container"></div>
+        
+        <div class="info-panel">
+            <h3 id="selected-info">칸을 선택해 주세요</h3>
+            <a href="https://www.instagram.com/사장님_아이디/" target="_blank" class="dm-btn">
+                인스타 DM으로 내 땅 사기
+            </a>
+            <p style="font-size: 0.8rem; color: #666; margin-top: 10px;">번호와 사진을 보내주시면 즉시 업로드 해드립니다.</p>
+        </div>
 
-    <div class="info-panel">
-        <a href="https://www.instagram.com/사장님_아이디/" target="_blank" class="dm-btn">
-            CLAIM YOUR SPACE (DM)
-        </a>
-        <p style="color: #666; font-size: 0.8rem; margin-top: 15px;">이미지 주소와 칸 번호를 DM으로 보내주세요.</p>
-    </div>
+        <div id="admin-panel">
+            <strong>Manager Mode</strong><br>
+            <input type="text" id="cell-num" placeholder="칸 번호"><br>
+            <input type="text" id="img-url" placeholder="이미지 주소(URL)"><br>
+            <button onclick="applyPhoto()" style="padding: 10px 20px; background: #333; color: white; border: none; border-radius: 5px; margin-top: 5px;">적용하기</button>
+        </div>
+    </main>
 
-    <div id="admin-panel">
-        <p style="color: var(--neon-blue); font-weight: bold; margin-top: 0;">MANAGER MODE</p>
-        <input type="text" id="cell-number" placeholder="칸 번호 입력">
-        <input type="text" id="img-url" placeholder="이미지 주소(URL) 입력">
-        <button onclick="applyPhoto()" style="padding: 8px 20px; border-radius: 8px; background: var(--neon-blue); border: none; cursor: pointer;">적용하기</button>
-    </div>
-
-    <div id="secret-trigger" onclick="checkAdmin()"></div>
+    <div id="secret-trigger" onclick="openAdmin()"></div>
 
     <script>
         const gridContainer = document.getElementById('grid-container');
         
-        // 1. [여기에 수시로 추가] 정식으로 분양 완료된 데이터 보관
+        // 1. [여기에 수시로 추가] 실제 주인이 있는 데이터 (새로고침해도 유지됨)
         const landOwners = {
-            1: "https://via.placeholder.com/100", // 예시
+            1: "https://via.placeholder.com/100", // 예시 데이터
         };
 
         const totalCells = 400;
         document.getElementById('sold-count').innerText = Object.keys(landOwners).length;
 
-        // 격자 생성
         for (let i = 1; i <= totalCells; i++) {
             const cell = document.createElement('div');
             cell.id = `cell-${i}`;
@@ -94,29 +93,30 @@
                 cell.classList.add('occupied');
                 cell.style.backgroundImage = `url('${landOwners[i]}')`;
             }
-            cell.addEventListener('click', () => alert(`${i}번 칸 선택됨`));
+            cell.addEventListener('click', () => {
+                document.getElementById('selected-info').innerText = `${i}번 칸 선택됨`;
+            });
             gridContainer.appendChild(cell);
         }
 
-        // 2. 사장님 인증 함수 (비밀번호: 1234 - 바꾸셔도 됩니다)
-        function checkAdmin() {
-            const pw = prompt("관리자 비밀번호를 입력하세요:");
-            if (pw === "1234") {
-                alert("관리자 모드 활성화");
+        // 관리자 모드 열기 (비밀번호: 1234)
+        function openAdmin() {
+            const pw = prompt("관리자 암호를 입력하세요:");
+            if(pw === "1234") {
                 document.getElementById('admin-panel').style.display = 'block';
+                alert("관리자 모드 활성화");
             }
         }
 
-        // 3. 실시간 사진 적용 시뮬레이션
+        // 임시로 사진 적용해보기
         function applyPhoto() {
-            const num = document.getElementById('cell-number').value;
+            const num = document.getElementById('cell-num').value;
             const url = document.getElementById('img-url').value;
             const target = document.getElementById(`cell-${num}`);
-            
-            if (target && url) {
+            if(target && url) {
                 target.classList.add('occupied');
                 target.style.backgroundImage = `url('${url}')`;
-                alert(`${num}번 칸에 적용되었습니다! (코드에도 반영해주셔야 저장됩니다)`);
+                alert(num + "번 칸에 임시 적용되었습니다.");
             }
         }
     </script>
