@@ -9,53 +9,44 @@
     <style>
         body { font-family: 'Apple SD Gothic Neo', sans-serif; text-align: center; background-color: #fdfaf4; margin: 0; padding: 15px; }
         .header-box { background: #ffffff; padding: 30px 20px; border-radius: 30px; margin-bottom: 20px; border: 1.5px solid #f0ede5; box-shadow: 0 10px 25px rgba(212,163,115,0.08); position: relative; }
-        /* 우측 상단 방문자 UI */
         .visitor-count { position: absolute; top: 15px; right: 20px; font-size: 0.75rem; color: #a19d94; font-weight: bold; background: #f8f5f0; padding: 4px 10px; border-radius: 12px; }
         .event-badge { display: inline-block; background: #dc2743; color: #fff; padding: 4px 12px; border-radius: 8px; font-weight: 800; font-size: 0.9rem; margin-bottom: 10px; animation: blink 1s infinite; }
         @keyframes blink { 50% { opacity: 0.6; } }
         h1 { font-size: 2.2rem; margin: 0; color: #d4a373; font-weight: 900; }
         .sub-title { font-size: 1.1rem; color: #5a564e; margin: 10px 0; font-weight: 800; }
-        .price-btn { background: #d4a373; color: white; border: none; padding: 8px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        #price-display { display: none; margin-top: 15px; padding: 15px; background: #fff9f0; border-radius: 15px; border: 1px dashed #d4a373; }
         #grid-container { display: grid; grid-template-columns: repeat(10, 1fr); gap: 2px; background-color: #e9e5d9; border: 4px solid #fff; border-radius: 15px; width: 100%; max-width: 500px; margin: 0 auto; padding: 3px; }
         .cell { background-color: #fff; aspect-ratio: 1 / 1; border-radius: 2px; cursor: pointer; transition: 0.2s; position: relative; }
-        .cell.selected { background-color: #FFEB3B !important; border: 1.5px solid #FBC02D; }
         .cell.occupied { background-size: cover; background-position: center; }
-        .selection-info { margin-top: 25px; font-size: 1.1rem; font-weight: 800; color: #d4a373; min-height: 1.5rem; }
-        .dm-btn { display: block; width: 90%; max-width: 400px; margin: 10px auto 30px auto; padding: 20px; font-size: 1.3rem; font-weight: 900; background: linear-gradient(45deg, #f09433, #dc2743, #cc2366); color: white; border-radius: 30px; text-decoration: none; box-shadow: 0 10px 20px rgba(220,39,67,0.2); transition: 0.3s; }
+        .dm-btn { display: block; width: 90%; max-width: 400px; margin: 20px auto; padding: 20px; font-size: 1.3rem; font-weight: 900; background: linear-gradient(45deg, #f09433, #dc2743, #cc2366); color: white; border-radius: 30px; text-decoration: none; box-shadow: 0 10px 20px rgba(220,39,67,0.2); }
         
-        #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; }
-        .modal-content { position: relative; width: 90%; max-width: 500px; }
-        #modal-img { width: 100%; border-radius: 15px; cursor: pointer; border: 2px solid rgba(255,255,255,0.2); }
-        .timer-tag { position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.7); color: #FFEB3B; padding: 5px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; backdrop-filter: blur(5px); }
-        /* 광고 클릭 수 UI */
-        .click-tag { position: absolute; top: 15px; left: 15px; background: rgba(255,255,255,0.9); color: #333; padding: 5px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; }
-        .go-hint { color: white; margin-top: 15px; font-size: 0.9rem; opacity: 0.8; }
+        /* 모달 스타일 수정: 정보창을 이미지 위로 배치 */
+        #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-content { width: 90%; max-width: 500px; text-align: left; }
+        .modal-info-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 0 5px; }
+        .modal-tag { background: rgba(255,255,255,0.15); color: #fff; padding: 5px 12px; border-radius: 10px; font-size: 0.75rem; font-weight: bold; }
+        #timer { color: #FFEB3B; border: 1px solid rgba(255,235,59,0.3); }
+        #modal-img { width: 100%; border-radius: 20px; cursor: pointer; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+        .go-hint { color: #fff; text-align: center; margin-top: 15px; font-size: 0.85rem; opacity: 0.6; }
     </style>
 </head>
 <body>
     <div class="header-box">
-        <div class="visitor-count">오늘 방문 <span id="total-visits">0</span></div>
-        <div id="view-badge" class="event-badge">로드 중...</div>
+        <div class="visitor-count">TODAY <span id="total-visits">0</span></div>
+        <div id="view-badge" class="event-badge">OPEN</div>
         <h1 id="view-title">돗자리</h1>
-        <div id="view-sub" class="sub-title">데이터를 가져오고 있습니다.</div>
-        <button class="price-btn" onclick="togglePrice()">💰 분양 가격표 보기</button>
-        <div id="price-display">
-            <p>📍 1일: <span id="p1">...</span></p>
-            <p>📍 7일: <span id="p2">...</span></p>
-            <p>📍 30일: <span id="p3">...</span></p>
-        </div>
+        <div id="view-sub" class="sub-title">불러오는 중...</div>
     </div>
     <div id="grid-container"></div>
-    <div id="selection-text" class="selection-info">원하는 자리를 클릭해보세요!</div>
-    <a href="#" id="event-link" target="_blank" class="dm-btn">이벤트 참여하기</a>
+    <a href="#" id="event-link" target="_blank" class="dm-btn">광고 문의하기</a>
 
     <div id="modal" onclick="closeModal()">
         <div class="modal-content" onclick="event.stopPropagation()">
-            <div id="click-count" class="click-tag">👀 오늘 0회 노출</div>
-            <div id="timer" class="timer-tag"></div>
+            <div class="modal-info-bar">
+                <div id="click-count" class="modal-tag">👀 조회 0</div>
+                <div id="timer" class="modal-tag">남은 시간 계산 중...</div>
+            </div>
             <img id="modal-img" src="" onclick="goToLink()">
-            <div class="go-hint">👆 이미지를 누르면 링크로 이동합니다</div>
+            <div class="go-hint">이미지를 터치하면 광고주 페이지로 이동합니다</div>
         </div>
     </div>
 
@@ -72,40 +63,24 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         let timerInterval;
-        let currentAdId = null;
         let currentLink = "";
-
-        // 방문자 카운팅 (오늘 날짜 기준)
         const today = new Date().toISOString().slice(0, 10);
-        db.ref('stats/visits/' + today).transaction(current => (current || 0) + 1);
-        db.ref('stats/visits/' + today).on('value', s => {
-            document.getElementById('total-visits').innerText = s.val() || 0;
-        });
 
-        function togglePrice() {
-            const d = document.getElementById('price-display');
-            d.style.display = d.style.display === 'block' ? 'none' : 'block';
-        }
-        function closeModal() {
-            document.getElementById('modal').style.display = 'none';
-            clearInterval(timerInterval);
-        }
-        function goToLink() {
-            if(currentLink && currentLink !== "#") window.open(currentLink, '_blank');
-        }
+        db.ref('stats/visits/' + today).transaction(c => (c || 0) + 1);
+        db.ref('stats/visits/' + today).on('value', s => { document.getElementById('total-visits').innerText = s.val() || 0; });
+
+        function closeModal() { document.getElementById('modal').style.display = 'none'; clearInterval(timerInterval); }
+        function goToLink() { if(currentLink && currentLink !== "#") window.open(currentLink, '_blank'); }
 
         db.ref('/').on('value', (snapshot) => {
             const data = snapshot.val() || {};
-            const textData = data.text || {};
             const adData = data.ads || {};
-
+            const textData = data.text || {};
+            
             document.getElementById('view-badge').innerText = textData.badge || "OPEN";
             document.getElementById('view-title').innerText = textData.title || "돗자리";
-            document.getElementById('view-sub').innerText = textData.sub || "";
-            document.getElementById('p1').innerText = textData.p1 || "";
-            document.getElementById('p2').innerText = textData.p2 || "";
-            document.getElementById('p3').innerText = textData.p3 || "";
-            document.getElementById('event-link').innerText = textData.btnText || "이벤트 참여하기";
+            document.getElementById('view-sub').innerText = textData.sub || "빈자리를 선점하세요!";
+            document.getElementById('event-link').innerText = textData.btnText || "광고 문의하기";
             document.getElementById('event-link').href = textData.btnLink || "#";
 
             const grid = document.getElementById('grid-container');
@@ -118,36 +93,28 @@
                 if (isOccupied) {
                     cell.style.backgroundImage = `url('${ad.url}')`;
                     cell.classList.add('occupied');
-                }
-                cell.onclick = (e) => {
-                    if (isOccupied) {
+                    cell.onclick = (e) => {
                         e.stopPropagation();
-                        currentAdId = i;
                         currentLink = ad.link || "";
                         document.getElementById('modal-img').src = ad.url;
                         document.getElementById('modal').style.display = 'flex';
                         
-                        // 광고 클릭/조회수 카운팅 (오늘 날짜 기준)
                         db.ref('stats/ads/' + today + '/' + i).transaction(c => (c || 0) + 1);
                         db.ref('stats/ads/' + today + '/' + i).on('value', s => {
-                            document.getElementById('click-count').innerText = `👀 오늘 ${s.val() || 0}회 노출`;
+                            document.getElementById('click-count').innerText = `👀 조회 ${s.val() || 0}`;
                         });
 
                         clearInterval(timerInterval);
                         timerInterval = setInterval(() => {
                             const rem = ad.expiry - Date.now();
-                            if (rem <= 0) { document.getElementById('timer').innerText = "종료"; return; }
+                            if (rem <= 0) { document.getElementById('timer').innerText = "종호"; return; }
                             const d = Math.floor(rem / 86400000);
-                            const h = Math.floor((rem % 86400000) / 3600000);
-                            const m = Math.floor((rem % 3600000) / 60000);
-                            document.getElementById('timer').innerText = `${d}일 ${h}:${m} 남음`;
+                            const h = String(Math.floor((rem % 86400000) / 3600000)).padStart(2, '0');
+                            const m = String(Math.floor((rem % 3600000) / 60000)).padStart(2, '0');
+                            document.getElementById('timer').innerText = `⏳ ${d}일 ${h}:${m} 남음`;
                         }, 1000);
-                    } else {
-                        document.querySelectorAll('.cell').forEach(c => c.classList.remove('selected'));
-                        cell.classList.add('selected');
-                        document.getElementById('selection-text').innerText = `선택하신 자리는 ${i}번입니다!`;
-                    }
-                };
+                    };
+                }
                 grid.appendChild(cell);
             }
         });
