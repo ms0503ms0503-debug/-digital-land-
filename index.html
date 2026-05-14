@@ -14,24 +14,27 @@
         @keyframes blink { 50% { opacity: 0.6; } }
         h1 { font-size: 2.2rem; margin: 0; color: #d4a373; font-weight: 900; }
         .sub-title { font-size: 1.1rem; color: #5a564e; margin: 10px 0; font-weight: 800; }
-
-        /* 가격표 확인 버튼 */
-        .price-open-btn { display: inline-block; background: #5a564e; color: white; padding: 6px 15px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; cursor: pointer; margin-top: 5px; border: none; }
         
+        /* 선택된 땅 안내 문구 스타일 */
+        #selection-info { font-size: 0.95rem; color: #d4a373; font-weight: bold; margin-bottom: 10px; min-height: 1.2rem; }
+        .price-open-btn { display: inline-block; background: #5a564e; color: white; padding: 6px 15px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; cursor: pointer; border: none; margin-bottom: 10px; }
+
         #grid-container { display: grid; grid-template-columns: repeat(10, 1fr); gap: 2px; background-color: #e9e5d9; border: 4px solid #fff; border-radius: 15px; width: 100%; max-width: 500px; margin: 0 auto; padding: 3px; }
         .cell { background-color: #fff; aspect-ratio: 1 / 1; border-radius: 2px; cursor: pointer; transition: 0.2s; position: relative; }
+        
+        /* 선택 시 노란색 칠하기 효과 */
+        .cell.selected { background-color: #FFEB3B !important; border: 2px solid #FBC02D; box-sizing: border-box; z-index: 10; transform: scale(1.1); }
         .cell.occupied { background-size: cover; background-position: center; }
         
         .dm-btn { display: block; width: 90%; max-width: 400px; margin: 20px auto; padding: 20px; font-size: 1.3rem; font-weight: 900; background: linear-gradient(45deg, #f09433, #dc2743, #cc2366); color: white; border-radius: 30px; text-decoration: none; box-shadow: 0 10px 20px rgba(220,39,67,0.2); }
         
-        /* 공통 모달 스타일 */
+        /* 모달 스타일 */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; justify-content: center; align-items: center; }
         .modal-content { width: 85%; max-width: 400px; text-align: center; }
         .modal-tag-bar { display: flex; justify-content: center; gap: 8px; margin-bottom: 15px; }
         .modal-tag { background: rgba(255,255,255,0.15); color: #fff; padding: 6px 12px; border-radius: 10px; font-size: 0.75rem; font-weight: bold; }
         #modal-img { width: 100%; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
         
-        /* 가격 전용 팝업 스타일 */
         .price-card { background: #fff; border-radius: 25px; padding: 30px 20px; text-align: center; }
         .price-card h3 { color: #d4a373; margin-top: 0; font-weight: 900; }
         .price-row { display: flex; justify-content: space-between; padding: 15px 10px; border-bottom: 1px solid #f0ede5; font-size: 1rem; color: #5a564e; }
@@ -46,14 +49,16 @@
         <div id="view-badge" class="event-badge">OPEN</div>
         <h1 id="view-title">돗자리</h1>
         <div id="view-sub" class="sub-title">불러오는 중...</div>
-        <!-- 가격표 버튼 추가 -->
+        
+        <!-- 선택 정보 안내 레이블 -->
+        <div id="selection-info">원하시는 빈 땅을 선택해 보세요!</div>
         <button class="price-open-btn" onclick="openPriceModal()">💰 분양 가격표 확인</button>
     </div>
 
     <div id="grid-container"></div>
     <a href="#" id="event-link" target="_blank" class="dm-btn">광고 문의하기</a>
 
-    <!-- 1. 광고 상세 모달 -->
+    <!-- 광고 상세 모달 -->
     <div id="ad-modal" class="modal-overlay" onclick="closeAdModal()">
         <div class="modal-content" onclick="event.stopPropagation()">
             <div class="modal-tag-bar">
@@ -65,7 +70,7 @@
         </div>
     </div>
 
-    <!-- 2. 가격표 전용 모달 -->
+    <!-- 가격표 전용 모달 -->
     <div id="price-modal" class="modal-overlay" onclick="closePriceModal()">
         <div class="modal-content" onclick="event.stopPropagation()">
             <div class="price-card">
@@ -91,6 +96,7 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         let timerInterval;
+        let selectedCell = null; // 현재 선택된 셀 추적
         const today = new Date().toISOString().slice(0, 10);
 
         function openPriceModal() { document.getElementById('price-modal').style.display = 'flex'; }
@@ -107,8 +113,6 @@
             document.getElementById('view-sub').innerText = textData.sub || "빈자리를 선점하세요!";
             document.getElementById('event-link').innerText = textData.btnText || "광고 문의하기";
             document.getElementById('event-link').href = textData.btnLink || "#";
-
-            // 가격표 데이터 세팅
             document.getElementById('p1-display').innerText = textData.p1 || "문의";
             document.getElementById('p2-display').innerText = textData.p2 || "문의";
             document.getElementById('p3-display').innerText = textData.p3 || "문의";
@@ -119,20 +123,24 @@
                 const cell = document.createElement('div');
                 cell.className = 'cell';
                 const ad = adData[i];
-                if (ad && ad.expiry > Date.now()) {
+                const isOccupied = ad && ad.expiry > Date.now();
+
+                if (isOccupied) {
                     cell.style.backgroundImage = `url('${ad.url}')`;
                     cell.classList.add('occupied');
                     cell.onclick = (e) => {
                         e.stopPropagation();
+                        // 광고가 있는 경우 기존 선택 해제
+                        if(selectedCell) selectedCell.classList.remove('selected');
+                        document.getElementById('selection-info').innerText = "원하시는 빈 땅을 선택해 보세요!";
+                        
                         document.getElementById('modal-img').src = ad.url;
                         document.getElementById('spot-num').innerText = `📍 ${i}번 자리`;
                         document.getElementById('ad-modal').style.display = 'flex';
-                        
                         db.ref('stats/ads/' + today + '/' + i).transaction(c => (c || 0) + 1);
                         db.ref('stats/ads/' + today + '/' + i).on('value', s => {
                             document.getElementById('click-count').innerText = `👀 조회 ${s.val() || 0}`;
                         });
-
                         clearInterval(timerInterval);
                         timerInterval = setInterval(() => {
                             const rem = ad.expiry - Date.now();
@@ -142,6 +150,14 @@
                             const m = String(Math.floor((rem % 3600000) / 60000)).padStart(2, '0');
                             document.getElementById('timer').innerText = `⏳ ${d}일 ${h}:${m} 남음`;
                         }, 1000);
+                    };
+                } else {
+                    // 빈 땅 클릭 시 노란색 효과
+                    cell.onclick = (e) => {
+                        if(selectedCell) selectedCell.classList.remove('selected');
+                        cell.classList.add('selected');
+                        selectedCell = cell;
+                        document.getElementById('selection-info').innerHTML = `현재 <span style="color:#dc2743;">[ ${i}번 ]</span> 자리를 선택하셨습니다.`;
                     };
                 }
                 grid.appendChild(cell);
